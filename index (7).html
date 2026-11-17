@@ -1,0 +1,1701 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDG Flights Sketch Space</title>
+<meta name="description" content="Every request a PDG Flights traveller might type, the cards that answer it, and a test box to try any request.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<style id="pdg-kit-css">
+/* PDG Flights card kit: tokens, base and every card the AI can place.
+   Shared by lab/ and design-system/. Light Product Designer Gym theme. */
+/* ---------- Product Designer Gym tokens (Light theme) ---------- */
+:root {
+  color-scheme: light;
+  --primary: #E4F222;
+  --primary-hover: #D3E10F;
+  --on-primary: #1A1919;
+  --primary-text: #5A6200;
+  --primary-text-hover: #1A1919;
+  --focus-ring: #1A1919;
+  --background: #F4F2EE;
+  --surface: #FFFFFF;
+  --text: #1A1919;
+  --text-muted: #5F5B55;
+  --border: #D9D5CE;
+  --success: #157A43;
+  --warning: #8F5A00;
+  --error: #C62828;
+  --on-error: #FFFFFF;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-1: 4px; --radius-2: 8px; --radius-3: 12px; --radius-4: 16px;
+  --radius-5: 24px; --radius-full: 9999px;
+  --border-width: 1px; --focus-ring-width: 2px;
+  --font-sans: "DM Sans", sans-serif;
+}
+
+/* ---------- Type styles ---------- */
+.h1 { font: 700 40px/48px var(--font-sans); }
+.h3 { font: 600 24px/32px var(--font-sans); }
+.h4 { font: 600 20px/28px var(--font-sans); }
+.body { font: 400 16px/24px var(--font-sans); }
+.caption { font: 400 14px/20px var(--font-sans); }
+.small { font: 400 12px/16px var(--font-sans); }
+@media (max-width: 600px) { .h1 { font-size: 32px; line-height: 40px; } }
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--background); }
+body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--background); color: var(--text); font-family: var(--font-sans); }
+h1, h2, h3, p { margin: 0; }
+:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 var(--space-4); }
+@media (min-width: 720px) { .wrap { padding: 0 var(--space-6); } }
+
+/* ---------- Components (from the PDG bundle) ---------- */
+.pdg-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-4); border: var(--border-width) solid transparent; border-radius: var(--radius-2); font-weight: 600; cursor: pointer; text-decoration: none; transition: background-color .12s, border-color .12s, color .12s; }
+.pdg-btn--primary { background: var(--primary); color: var(--on-primary); }
+.pdg-btn--primary:hover { background: var(--primary-hover); }
+.pdg-btn--secondary { background: transparent; color: var(--text); border-color: var(--text-muted); }
+.pdg-btn--secondary:hover { border-color: var(--primary-text-hover); color: var(--primary-text-hover); }
+.pdg-btn--ghost { background: transparent; color: var(--primary-text); padding: 0 var(--space-2); }
+.pdg-btn--ghost:hover { color: var(--primary-text-hover); text-decoration: underline; }
+.pdg-btn:disabled { background: var(--surface); color: var(--text-muted); border-color: var(--border); cursor: not-allowed; }
+.pdg-btn svg { width: 18px; height: 18px; flex: none; }
+
+.pdg-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); color: var(--text); }
+.pdg-card__title { margin: 0; }
+.pdg-card__meta { margin: 0; color: var(--text-muted); }
+.pdg-card__body { margin: 0; color: var(--text); }
+.pdg-card__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+
+.pdg-badge { display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); border: var(--border-width) solid currentColor; border-radius: var(--radius-1); background: var(--surface); font-weight: 600; }
+.pdg-badge--success { color: var(--success); }
+.pdg-badge--warning { color: var(--warning); }
+.pdg-badge--error { color: var(--error); }
+.pdg-badge--neutral { color: var(--text-muted); }
+
+
+/* ---------- Prompt ---------- */
+
+.prompt { background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-4); padding: var(--space-3); transition: border-color .12s; }
+.prompt:hover { border-color: var(--text-muted); }
+.prompt:focus-within { border-color: var(--focus-ring); box-shadow: 0 0 0 1px var(--focus-ring); }
+.prompt__input { display: block; width: 100%; min-height: 72px; max-height: 240px; resize: none; padding: var(--space-2) var(--space-2); background: transparent; color: var(--text); border: 0; outline: none; }
+.prompt__input::placeholder { color: var(--text-muted); }
+.prompt__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-2); }
+.context { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chip { display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); background: var(--background); color: var(--text-muted); }
+.chip svg { width: 14px; height: 14px; flex: none; }
+
+
+/* ---------- Results ---------- */
+.results { padding: var(--space-5) 0 var(--space-7); }
+.results__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); min-height: 40px; }
+.results__status { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); }
+.query { display: flex; gap: var(--space-3); align-items: flex-start; margin-bottom: var(--space-4); padding: var(--space-4); border-radius: var(--radius-3); background: var(--surface); border: var(--border-width) solid var(--border); }
+.query__label { color: var(--text-muted); display: block; margin-bottom: var(--space-1); }
+.query__avatar { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: var(--radius-full); background: var(--background); color: var(--text-muted); }
+.query__avatar svg { width: 16px; height: 16px; }
+
+/* The canvas the AI places cards on */
+.canvas { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+@media (min-width: 720px) { .canvas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Add class="span-2" to a card that should take the full row */
+@media (min-width: 720px) { .canvas > .span-2 { grid-column: 1 / -1; } }
+
+
+/* Placeholder slot, swapped out for participants' cards */
+.slot { min-height: 200px; justify-content: center; align-items: center; text-align: center; border-style: dashed; background: transparent; }
+.slot__num { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary); font-weight: 700; }
+.slot .pdg-card__meta { max-width: 260px; }
+
+/* Loading skeleton */
+.skeleton { min-height: 200px; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
+.skeleton i { display: block; height: 12px; border-radius: var(--radius-1); background: var(--background); animation: pulse 1.2s ease-in-out infinite; }
+.skeleton i:nth-child(1) { width: 40%; height: 20px; }
+.skeleton i:nth-child(2) { width: 85%; }
+.skeleton i:nth-child(3) { width: 65%; }
+@keyframes pulse { 50% { opacity: .45; } }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: var(--radius-full); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.card-in { animation: rise .35s ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .skeleton i, .spinner, .card-in { animation: none; } }
+
+
+/* ================= Results example: card kit ================= */
+.canvas > * { grid-column: 1 / -1; }
+@media (min-width: 720px) { .canvas > .half { grid-column: auto; } }
+.group-label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); }
+.group-label .caption { color: var(--text-muted); }
+.ai-note { display: flex; gap: var(--space-3); align-items: flex-start; color: var(--text); }
+.ai-note__icon { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: var(--radius-2); background: var(--primary); color: var(--on-primary); }
+.ai-note__icon svg { width: 16px; height: 16px; }
+.ai-note p { padding-top: var(--space-1); }
+
+.icon { width: 16px; height: 16px; flex: none; }
+.row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.spread { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.muted { color: var(--text-muted); }
+.strong { font-weight: 600; }
+
+/* Flight card */
+.flight { gap: var(--space-4); }
+.flight__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.airline { display: flex; align-items: center; gap: var(--space-3); }
+.airline__logo { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-2); background: var(--background); border: var(--border-width) solid var(--border); font-weight: 700; }
+.route { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-4); }
+.route__end { display: flex; flex-direction: column; }
+.route__end--arr { text-align: right; }
+.route__time { font: 600 24px/32px var(--font-sans); }
+.route__mid { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); color: var(--text-muted); min-width: 0; }
+.route__line { position: relative; width: 100%; height: 1px; background: var(--border); }
+.route__line::before, .route__line::after { content: ""; position: absolute; top: -3px; width: 7px; height: 7px; border-radius: var(--radius-full); background: var(--surface); border: var(--border-width) solid var(--text-muted); }
+.route__line::before { left: 0; } .route__line::after { right: 0; }
+.route__line i { position: absolute; top: -3px; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: var(--radius-full); background: var(--text-muted); }
+.flight__bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding-top: var(--space-4); border-top: var(--border-width) solid var(--border); }
+.flight__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); color: var(--text-muted); }
+.flight__facts span { display: inline-flex; align-items: center; gap: var(--space-1); }
+.flight__buy { display: flex; align-items: center; gap: var(--space-4); margin-left: auto; }
+.price { font: 700 24px/32px var(--font-sans); }
+.price small { font: 400 12px/16px var(--font-sans); color: var(--text-muted); margin-left: var(--space-1); }
+@media (max-width: 520px) {
+  .route { gap: var(--space-3); }
+  .route__time { font-size: 20px; line-height: 28px; }
+  .flight__buy { margin-left: 0; width: 100%; justify-content: space-between; }
+}
+
+/* Highlight card (spontaneous) */
+.highlight { border-color: var(--text); }
+.highlight__label { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); border-radius: var(--radius-1); background: var(--primary); color: var(--on-primary); font-weight: 600; }
+.highlight__dest { font: 700 32px/40px var(--font-sans); }
+.highlight .price { font-size: 32px; line-height: 40px; }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-3); margin: 0; }
+.facts div { display: flex; flex-direction: column; }
+.facts dt { color: var(--text-muted); }
+.facts dd { margin: 0; font-weight: 600; }
+
+/* Status card */
+.status { flex-direction: row; align-items: flex-start; gap: var(--space-4); }
+.status__icon { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: var(--radius-2); background: var(--background); }
+.status__icon svg { width: 20px; height: 20px; }
+.status--warning .status__icon { color: var(--warning); }
+.status--error .status__icon { color: var(--error); }
+.status__body { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+
+/* Airport + map */
+.map { display: block; width: 100%; height: auto; border-radius: var(--radius-2); background: var(--background); }
+.inline-form { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.inline-form .pdg-input { flex: 1; min-width: 160px; }
+.pdg-input { box-sizing: border-box; padding: var(--space-2) var(--space-3); min-height: 40px; background: var(--surface); color: var(--text); border: var(--border-width) solid var(--border); border-radius: var(--radius-2); font: inherit; }
+.pdg-input:hover { border-color: var(--text-muted); }
+
+/* Lists inside cards */
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.list li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-top: var(--border-width) solid var(--border); }
+.list li:first-child { border-top: 0; padding-top: 0; }
+.list li:last-child { padding-bottom: 0; }
+.list__main { display: flex; flex-direction: column; min-width: 0; }
+
+/* Toggle */
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); cursor: pointer; }
+.toggle input { appearance: none; width: 44px; height: 24px; flex: none; border-radius: var(--radius-full); background: var(--border); position: relative; cursor: pointer; transition: background .15s; margin: 0; }
+.toggle input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: var(--radius-full); background: var(--surface); transition: transform .15s; }
+.toggle input:checked { background: var(--text); }
+.toggle input:checked::after { transform: translateX(20px); }
+
+/* Unknown case */
+.pill-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.pill { display: inline-flex; align-items: center; min-height: 36px; padding: var(--space-1) var(--space-3); border: var(--border-width) solid var(--border); border-radius: var(--radius-full); background: var(--surface); color: var(--text); font-weight: 600; cursor: pointer; text-align: left; }
+.pill:hover { border-color: var(--text-muted); }
+.pill.is-on { background: var(--text); color: var(--surface); border-color: var(--text); }
+.suggest { display: flex; flex-direction: column; gap: var(--space-2); }
+.suggest button { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); width: 100%; padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--border); border-radius: var(--radius-2); background: var(--background); color: var(--text); cursor: pointer; text-align: left; }
+.suggest button:hover { border-color: var(--text-muted); }
+
+/* Facilitator note */
+.case-tag { display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); border-radius: var(--radius-1); border: var(--border-width) dashed var(--text-muted); color: var(--text-muted); }
+
+/* Question card: what we know so far */
+.known { gap: var(--space-1) var(--space-2); }
+.known__chip { display: inline-flex; padding: 2px var(--space-2); border-radius: var(--radius-1); background: var(--background); border: var(--border-width) solid var(--border); font-weight: 600; color: var(--text); }
+button.known__chip { cursor: pointer; font: inherit; font-weight: 600; }
+button.known__chip:hover { border-color: var(--text-muted); }
+
+/* Trip card: what the AI understood, tap to change */
+.trip { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.trip__chip { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 32px; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); border: var(--border-width) solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; cursor: pointer; }
+.trip__chip:hover { border-color: var(--text-muted); }
+.trip__icon { width: 12px; height: 12px; color: var(--text-muted); }
+.trip__chip--need { border-style: dashed; }
+.trip__x { font-size: 16px; line-height: 1; color: var(--text-muted); }
+
+/* Sort control on a group label */
+.group-label { align-items: flex-end; }
+.group-label > div { display: flex; flex-direction: column; }
+.sort { display: inline-flex; align-items: center; gap: var(--space-2); }
+.sort-select { min-height: 32px; padding: 0 var(--space-2); }
+</style>
+<style>
+/* ---------- Design system page layout ---------- */
+.wrap { max-width: 1120px; }
+main { flex: 1; }
+.site-header { padding: var(--space-5) 0 var(--space-4); }
+.site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.brand { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text); text-decoration: none; }
+.brand__mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-2); background: var(--primary); color: var(--on-primary); }
+.brand__mark svg { width: 18px; height: 18px; }
+.brand__sub { color: var(--text-muted); font-weight: 400; }
+
+.nav { position: sticky; top: 0; z-index: 5; background: var(--background); border-bottom: var(--border-width) solid var(--border); }
+.nav .wrap { display: flex; gap: var(--space-1); overflow-x: auto; scrollbar-width: none; }
+.nav a { flex: none; padding: var(--space-3) var(--space-3); color: var(--text-muted); text-decoration: none; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.nav a:hover { color: var(--text); }
+.nav a.is-on { color: var(--text); border-bottom-color: var(--text); }
+
+.section { padding: var(--space-7) 0 var(--space-6); scroll-margin-top: 48px; }
+.section + .section { border-top: var(--border-width) solid var(--border); }
+.eyebrow { display: inline-block; margin-bottom: var(--space-2); color: var(--primary-text); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.lede { color: var(--text-muted); max-width: 640px; margin-top: var(--space-2); }
+.section__head { margin-bottom: var(--space-6); }
+.h2 { font: 700 32px/40px var(--font-sans); }
+@media (max-width: 600px) { .h2 { font-size: 26px; line-height: 34px; } }
+
+/* Flow diagram */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-6); counter-reset: step; }
+.flow__step { position: relative; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4); background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); }
+.flow__step::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 24px; height: 24px; margin-bottom: var(--space-2); border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary); font: 700 12px/1 var(--font-sans); }
+.flow__step:not(:last-child)::after { content: ""; position: absolute; right: -10px; top: 50%; width: 8px; height: 8px; border-top: 2px solid var(--text-muted); border-right: 2px solid var(--text-muted); transform: translateY(-50%) rotate(45deg); }
+.flow__step .caption { color: var(--text-muted); }
+.flow__step--ai { border-color: var(--text); }
+@media (max-width: 860px) {
+  .flow { grid-template-columns: 1fr; }
+  .flow__step:not(:last-child)::after { right: auto; left: 28px; top: auto; bottom: -10px; transform: rotate(135deg); }
+}
+
+/* Rules ladder */
+.ladder { display: flex; flex-direction: column; gap: var(--space-4); }
+.rule { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-4); padding: var(--space-5); background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); }
+.rule__num { display: grid; place-items: center; width: 48px; height: 48px; border-radius: var(--radius-3); background: var(--background); font: 700 20px/1 var(--font-sans); }
+.rule:first-child .rule__num { background: var(--primary); color: var(--on-primary); }
+.rule__body { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.rule__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.rule__grid h4 { margin: 0 0 var(--space-2); font: 600 14px/20px var(--font-sans); color: var(--text-muted); }
+.rule__grid ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: var(--space-1); }
+.kv { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: var(--space-2) var(--space-4); margin: 0; }
+.kv dt { color: var(--text-muted); }
+.kv dd { margin: 0; }
+.sig { display: inline-flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2); border-radius: var(--radius-1); background: var(--background); border: var(--border-width) solid var(--border); font-weight: 600; }
+.sig--req { border-color: var(--text); }
+.sig-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.do li::marker { content: "✓  "; color: var(--success); font-weight: 700; }
+.dont li::marker { content: "✕  "; color: var(--error); font-weight: 700; }
+@media (max-width: 720px) {
+  .rule { grid-template-columns: 1fr; padding: var(--space-4); }
+  .rule__grid { grid-template-columns: 1fr; }
+  .kv { grid-template-columns: 1fr; gap: 0; }
+  .kv dd { margin-bottom: var(--space-2); }
+}
+.callout { margin-top: var(--space-5); padding: var(--space-4) var(--space-5); border-radius: var(--radius-3); background: var(--surface); border: var(--border-width) dashed var(--text-muted); }
+.callout--key { border-style: solid; border-color: var(--text); box-shadow: inset 4px 0 0 var(--primary); }
+.callout ul { margin: var(--space-2) 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: var(--space-1); }
+
+/* Tabs */
+.tabs { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-5); }
+.tab { min-height: 36px; padding: var(--space-1) var(--space-4); border-radius: var(--radius-full); border: var(--border-width) solid var(--border); background: var(--surface); color: var(--text); font: 600 14px/20px var(--font-sans); cursor: pointer; }
+.tab:hover { border-color: var(--text-muted); }
+.tab[aria-selected="true"] { background: var(--text); color: var(--surface); border-color: var(--text); }
+
+/* Result pattern */
+.pattern { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.pattern__spec { position: sticky; top: 64px; display: flex; flex-direction: column; gap: var(--space-4); }
+.recipe { list-style: none; margin: 0; padding: 0; counter-reset: r; display: flex; flex-direction: column; }
+.recipe li { counter-increment: r; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--space-2); padding: var(--space-2) 0; border-top: var(--border-width) solid var(--border); }
+.recipe li:first-child { border-top: 0; }
+.recipe li::before { content: counter(r); display: grid; place-items: center; width: 20px; height: 20px; margin-top: 2px; border-radius: var(--radius-full); background: var(--background); font: 700 11px/1 var(--font-sans); }
+.recipe a { color: var(--text); font-weight: 600; text-decoration-color: var(--border); text-underline-offset: 3px; }
+.recipe a:hover { text-decoration-color: var(--text); }
+.recipe .small { display: block; color: var(--text-muted); }
+.ask { padding: var(--space-3) var(--space-4); border-radius: var(--radius-2); background: var(--background); }
+.stage { padding: var(--space-5); border-radius: var(--radius-4); background: var(--background); border: var(--border-width) solid var(--border); }
+.stage__label { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); color: var(--text-muted); }
+.stage .canvas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stage .canvas > * { grid-column: 1 / -1; }
+.stage .canvas > .half { grid-column: auto; }
+@media (max-width: 960px) {
+  .pattern { grid-template-columns: 1fr; }
+  .pattern__spec { position: static; }
+}
+@media (max-width: 640px) {
+  .stage { padding: var(--space-3); }
+  .stage .canvas { grid-template-columns: 1fr; }
+  .stage .canvas > .half { grid-column: 1 / -1; }
+}
+
+/* Card catalogue */
+.cat { display: flex; flex-direction: column; gap: var(--space-5); }
+.spec { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: var(--space-5); padding: var(--space-5); background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-4); scroll-margin-top: 64px; }
+.spec__info { display: flex; flex-direction: column; gap: var(--space-3); }
+.spec__info code, .code { font: 500 13px/20px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--background); padding: 1px 6px; border-radius: var(--radius-1); }
+.spec__preview { padding: var(--space-4); border-radius: var(--radius-3); background: var(--background); min-width: 0; }
+.spec__preview .canvas { grid-template-columns: 1fr; }
+.spec__preview .canvas > .half { grid-column: 1 / -1; }
+.spec__rules { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding-top: var(--space-4); border-top: var(--border-width) solid var(--border); }
+.spec__rules dt { font-weight: 700; margin-bottom: var(--space-1); }
+.spec__rules div:nth-child(3) dt { color: var(--error); }
+.spec__rules div:nth-child(2) dt { color: var(--success); }
+.spec__rules dd { margin: 0; color: var(--text-muted); }
+@media (max-width: 860px) { .spec__rules { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .spec__rules { grid-template-columns: 1fr; } }
+.stage [data-edit], .stage [data-drop], .spec__preview [data-edit], .spec__preview [data-drop] { pointer-events: none; }
+.props { width: 100%; border-collapse: collapse; }
+.props th, .props td { text-align: left; padding: var(--space-1) 0; border-top: var(--border-width) solid var(--border); vertical-align: top; }
+.props th { color: var(--text-muted); font-weight: 400; padding-right: var(--space-3); white-space: nowrap; }
+.used { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+@media (max-width: 860px) { .spec { grid-template-columns: 1fr; padding: var(--space-4); } }
+
+/* Playground */
+.play { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.play__side { display: flex; flex-direction: column; gap: var(--space-4); position: sticky; top: 64px; }
+.examples { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.trace { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.trace li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-2); border: var(--border-width) solid var(--border); background: var(--surface); }
+.trace li.is-win { border-color: var(--text); box-shadow: inset 4px 0 0 var(--primary); }
+.trace li.is-skip { opacity: .55; }
+.trace__mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--background); font: 700 12px/1 var(--font-sans); }
+.is-win .trace__mark { background: var(--primary); color: var(--on-primary); }
+.is-fail .trace__mark { color: var(--text-muted); }
+.trace li.is-ask { border-color: var(--warning); }
+.is-ask .trace__mark { background: var(--warning); color: var(--surface); }
+.slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); margin: 0; }
+.slots div { padding: var(--space-2) var(--space-3); border-radius: var(--radius-2); background: var(--surface); border: var(--border-width) solid var(--border); }
+.slots dt { color: var(--text-muted); }
+.slots dd { margin: 0; font-weight: 600; }
+.slots dd.none { color: var(--text-muted); font-weight: 400; }
+.verdict { padding: var(--space-4); border-radius: var(--radius-3); background: var(--text); color: var(--surface); display: flex; flex-direction: column; gap: var(--space-1); }
+.verdict .small { opacity: .75; }
+@media (max-width: 960px) { .play { grid-template-columns: 1fr; } .play__side { position: static; } }
+
+.site-footer { padding: var(--space-5) 0 var(--space-6); color: var(--text-muted); border-top: var(--border-width) solid var(--border); }
+.site-footer a { color: var(--text); }
+</style>
+<style>
+/* ---------- Sketch space additions ---------- */
+.hero { padding: var(--space-6) 0 var(--space-6); }
+.hero .h1 { max-width: 760px; text-wrap: balance; }
+.scope { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); align-items: center; }
+.scope__chip { padding: 2px var(--space-3); border-radius: var(--radius-full); border: var(--border-width) solid var(--border); background: var(--surface); }
+.scope__chip--in { border-color: var(--text); background: var(--primary); color: var(--on-primary); font-weight: 600; }
+.scope__chip--out { color: var(--text-muted); text-decoration: line-through; }
+.ground { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); counter-reset: g; }
+.ground li { counter-increment: g; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4); background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); }
+.ground li::before { content: counter(g); display: grid; place-items: center; width: 24px; height: 24px; margin-bottom: var(--space-1); border-radius: var(--radius-full); background: var(--background); font: 700 12px/1 var(--font-sans); }
+.ground .caption { color: var(--text-muted); }
+@media (max-width: 900px) { .ground { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .ground { grid-template-columns: 1fr; } }
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); color: var(--text-muted); }
+.st { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; width: 10px; height: 10px; border-radius: var(--radius-full); border: 2px solid currentColor; }
+.st--built { color: var(--success); } .st--built::before { background: currentColor; }
+.st--part { color: var(--warning); } .st--part::before { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.st--new { color: var(--text-muted); } .st--new::before { border-style: dashed; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-6); }
+.tile { display: flex; flex-direction: column; gap: var(--space-2); text-align: left; padding: var(--space-4); background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); color: var(--text); font-family: var(--font-sans); cursor: pointer; }
+.tile:hover { border-color: var(--text-muted); }
+.tile[aria-pressed="true"] { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text), inset 0 4px 0 var(--primary); }
+.tile--new { border-style: dashed; }
+.tile__top { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+.tile__id { font: 700 12px/16px var(--font-sans); padding: 2px 6px; border-radius: var(--radius-1); background: var(--background); }
+.tile__ex { color: var(--text-muted); }
+
+.sketch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.sk { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 2px; padding: var(--space-3) var(--space-4); border-radius: var(--radius-3); background: var(--surface); border: var(--border-width) solid var(--border); }
+.sk.half { grid-column: auto; }
+.sk--new { border: 2px dashed var(--text-muted); background: repeating-linear-gradient(135deg, var(--surface) 0 10px, var(--background) 10px 11px); }
+.sk__name { font-weight: 700; display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+.sk__note { color: var(--text-muted); }
+.sk--thin { padding: var(--space-2) var(--space-4); background: transparent; border-style: dashed; }
+@media (max-width: 640px) { .sketch { grid-template-columns: 1fr; } .sk.half { grid-column: 1 / -1; } }
+.today { padding: var(--space-3) var(--space-4); border-radius: var(--radius-2); border: var(--border-width) solid var(--warning); background: var(--surface); }
+
+.layers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-5) 0 var(--space-6); }
+.layer { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-3); background: var(--surface); border: var(--border-width) solid var(--border); }
+.layer--ai { border-color: var(--text); }
+.layer .small { color: var(--text-muted); }
+@media (max-width: 760px) { .layers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.sub { margin: var(--space-6) 0 var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
+.sub:first-child { margin-top: 0; }
+.cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-3); align-items: start; }
+@media (max-width: 400px) { .cardgrid { grid-template-columns: 1fr; } }
+.ctile { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); scroll-margin-top: 64px; min-width: 0; }
+.ctile--new { border: 2px dashed var(--text-muted); }
+.ctile .ids { display: flex; flex-wrap: wrap; gap: 4px; }
+.ctile .ids span { font: 600 11px/16px var(--font-sans); padding: 0 6px; border-radius: var(--radius-1); background: var(--background); }
+.ctile h4 { margin: 0; }
+.ctile details summary { cursor: pointer; font: 600 14px/20px var(--font-sans); color: var(--primary-text); }
+.ctile details[open] summary { margin-bottom: var(--space-3); }
+.ctile .spec__preview { padding: var(--space-3); }
+.ctile .spec__rules { grid-template-columns: 1fr; margin-top: var(--space-3); }
+.mock { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-2); background: var(--background); }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal span { display: flex; flex-direction: column; align-items: center; padding: 6px 0; border-radius: var(--radius-1); background: var(--surface); border: var(--border-width) solid var(--border); font: 600 12px/16px var(--font-sans); font-variant-numeric: tabular-nums; }
+.cal span i { font-style: normal; font-weight: 400; color: var(--text-muted); font-size: 11px; }
+.cal span.lo { border-color: var(--success); color: var(--success); }
+.cmp { display: grid; grid-template-columns: 90px repeat(2, minmax(0, 1fr)); font: 400 12px/16px var(--font-sans); font-variant-numeric: tabular-nums; }
+.cmp > * { padding: 6px; border-top: var(--border-width) solid var(--border); }
+.cmp b { font-weight: 600; }
+.cmp .diff { background: var(--surface); font-weight: 700; }
+.cmp .lab { color: var(--text-muted); }
+.dest { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.dest div { padding: var(--space-2); border-radius: var(--radius-2); background: var(--surface); border: var(--border-width) solid var(--border); font: 400 11px/15px var(--font-sans); }
+.dest b { display: block; font-size: 13px; line-height: 18px; }
+
+.btable { width: 100%; border-collapse: collapse; min-width: 560px; }
+.btable th, .btable td { text-align: left; padding: var(--space-2) var(--space-3); border-top: var(--border-width) solid var(--border); vertical-align: top; }
+.btable thead th { border-top: 0; color: var(--text-muted); font-weight: 600; }
+.btable tbody th { font-weight: 600; white-space: nowrap; }
+.scroll { overflow-x: auto; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); }
+.match { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--space-2); }
+.match a { font: 600 12px/16px var(--font-sans); padding: 2px 8px; border-radius: var(--radius-1); background: var(--primary); color: var(--on-primary); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../" aria-label="PDG Flights home">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+      </span>
+      <span class="h4">PDG Flights <span class="brand__sub">Sketch space</span></span>
+    </a>
+    <a class="pdg-btn pdg-btn--secondary caption" href="#test">Test a request</a>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap caption">
+    <a href="#rules">Ground rules</a>
+    <a href="#scenarios">Scenarios</a>
+    <a href="#components">Components</a>
+    <a href="#test">Test</a>
+  </div>
+</nav>
+
+<main>
+  <section class="section hero" id="rules">
+    <div class="wrap">
+      <span class="eyebrow small">Rules and sketch space · Draft v0.3</span>
+      <h1 class="h1">Every request a traveller might type, and the cards we answer it with.</h1>
+      <p class="body lede">PDG Flights builds its screen per request. The AI reads what the traveller asked, picks one result, and builds it from a fixed kit of cards. This page maps what travellers ask (scenarios) to what we build answers from (components). Then you can test any request below.</p>
+      <div class="scope caption"><span class="muted">Scope</span>
+        <span class="scope__chip scope__chip--in">Find</span><span class="scope__chip scope__chip--in">Explore</span><span class="scope__chip scope__chip--in">Compare</span><span class="scope__chip scope__chip--in">Disruption</span>
+        <span class="scope__chip scope__chip--out">Book</span><span class="scope__chip scope__chip--out">Manage</span><span class="scope__chip scope__chip--out">Day of travel</span>
+      </div>
+      <ol class="ground" id="ground"></ol>
+    </div>
+  </section>
+
+  <section class="section" id="scenarios">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow small">Part 1 · Scenarios</span>
+        <h2 class="h2">What travellers ask</h2>
+        <p class="body lede">Pick a scenario to see the cards that answer it. Built ones show the live result from the kit. Proposed ones show a sketch, plus what the kit does with that request today.</p>
+      </div>
+      <div class="tabs" role="tablist" id="sc-tabs"></div>
+      <div class="legend small"><span class="st st--built">Built</span><span class="st st--part">Partly built</span><span class="st st--new">Proposed</span></div>
+      <div class="tiles" id="sc-tiles"></div>
+      <div id="sc-panel"></div>
+    </div>
+  </section>
+
+  <section class="section" id="components">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow small">Part 2 · Components</span>
+        <h2 class="h2">What we build answers from</h2>
+        <p class="body lede">Four layers, each built only from the one below. The AI picks the result, chooses and fills the cards, and adds or leaves out blocks. Designers own the atoms and decide which blocks each card can hold.</p>
+      </div>
+      <div class="layers">
+        <div class="layer"><span class="small">Layer 1</span><span class="body strong">Atoms</span><span class="caption muted">Button, input, badge, pill, chip, icon, tokens</span></div>
+        <div class="layer"><span class="small">Layer 2</span><span class="body strong">Blocks</span><span class="caption muted">Small groups of atoms inside a card</span></div>
+        <div class="layer layer--ai"><span class="small">Layer 3 · AI fills</span><span class="body strong">Cards</span><span class="caption muted">One job each</span></div>
+        <div class="layer layer--ai"><span class="small">Layer 4 · AI picks</span><span class="body strong">Results</span><span class="caption muted">A fixed recipe of cards for one kind of ask</span></div>
+      </div>
+
+      <div class="sub"><h3 class="h3">Cards we have</h3><p class="caption muted">12 cards. Open one to see it and its four rules.</p></div>
+      <div class="cardgrid" id="cards-built"></div>
+
+      <div class="sub"><h3 class="h3">Cards to build</h3><p class="caption muted">3 cards cover every proposed scenario in scope. Sketches only.</p></div>
+      <div class="cardgrid" id="cards-new"></div>
+
+      <div class="sub"><h3 class="h3">Blocks</h3><p class="caption muted">Add a block only if it makes the card clearer or the decision quicker. If it wouldn't change what the traveller picks, leave it out.</p></div>
+      <div class="scroll"><table class="btable caption" id="blocks"></table></div>
+    </div>
+  </section>
+
+  <section class="section" id="test">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow small">Test</span>
+        <h2 class="h2">Type a request and see the result</h2>
+        <p class="body lede">This runs the same rules as the testing home page. You'll see which result wins, why, which scenarios it matches, and the cards the traveller would see. Tap an answer in the result to add it to your request.</p>
+      </div>
+      <div class="play">
+        <div class="play__side">
+          <form class="prompt" id="pg-form" autocomplete="off">
+            <label class="visually-hidden" for="pg-input">Request</label>
+            <textarea class="body prompt__input" id="pg-input" rows="3" placeholder="e.g. Get me to Lisbon this weekend"></textarea>
+            <div class="prompt__bar"><span></span><button class="pdg-btn pdg-btn--primary body" type="submit">Run</button></div>
+          </form>
+          <div>
+            <p class="caption muted" style="margin-bottom: var(--space-2)">Try one</p>
+            <div class="examples" id="pg-examples"></div>
+          </div>
+          <div id="pg-verdict"></div>
+          <div>
+            <p class="caption muted" style="margin-bottom: var(--space-2)">Details found</p>
+            <dl class="slots caption" id="pg-slots"></dl>
+          </div>
+          <div>
+            <p class="caption muted" style="margin-bottom: var(--space-2)">Rules, in order</p>
+            <ol class="trace caption" id="pg-trace"></ol>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage__label small"><span>What the traveller sees</span><span id="pg-tag"></span></div>
+          <div class="canvas" id="pg-canvas"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap small">PDG Flights is a fictional airline made for a Product Designer Gym workshop. The written version of this page is <span class="code">RULES.md</span>. Cards and rules live in <span class="code">kit/pdg-kit.js</span>, shared with the <a href="../lab/">testing home page</a> and the <a href="../design-system/">card kit</a>.</div>
+</footer>
+<script id="pdg-kit-js">
+/* PDG Flights card kit + rules. Shared by lab/ and design-system/.
+   window.PDGKit.render(text) checks the essentials, picks ONE result using RULES and returns its cards. */
+(function () {
+  /* ---------------- Icons ---------------- */
+  var P = {
+    plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    seat: '<path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/>',
+    wind: '<path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7"/>',
+    alert: '<path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18h.01"/>',
+    pin: '<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+    car: '<path d="M5 17h14v-5l-2-5H7l-2 5z"/><circle cx="8" cy="17" r="1.5"/><circle cx="16" cy="17" r="1.5"/>',
+    bed: '<path d="M3 18V6M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="10" r="2"/>',
+    train: '<rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M9 21l-2-4M15 21l2-4"/>',
+    bus: '<rect x="4" y="4" width="16" height="13" rx="2"/><path d="M4 11h16M7 21v-4M17 21v-4"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+    bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+    sparkle: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+    tag: '<path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+    zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/>'
+  };
+  function ic(name, cls) {
+    return '<svg class="' + (cls || 'icon') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + P[name] + '</svg>';
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  /* ---------------- Time helpers (all relative to now, so the demo never goes stale) ---------------- */
+  var NOW = new Date();
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function addMin(t, m) { return new Date(t.getTime() + m * 60000); }
+  function soon(mins) { var t = addMin(NOW, mins); t.setMinutes(Math.ceil(t.getMinutes() / 5) * 5, 0, 0); return t; }
+  function at(dayOffset, hhmm) { var t = new Date(NOW); t.setDate(t.getDate() + dayOffset); var p = hhmm.split(':'); t.setHours(+p[0], +p[1], 0, 0); return t; }
+  function hm(t) { return pad(t.getHours()) + ':' + pad(t.getMinutes()); }
+  function dayDiff(t) { var a = new Date(NOW); a.setHours(0, 0, 0, 0); var b = new Date(t); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); }
+  function dayLabel(t) {
+    var o = { weekday: 'short', day: 'numeric', month: 'short' };
+    if (t.getFullYear() !== NOW.getFullYear()) o.year = 'numeric';
+    var s = t.toLocaleDateString('en-GB', o);
+    var d = dayDiff(t);
+    return d === 0 ? 'Today, ' + s : d === 1 ? 'Tomorrow, ' + s : s;
+  }
+  function dur(m) { return Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : ''); }
+  function until(t) { var m = Math.round((t - NOW) / 60000); var h = Math.floor(m / 60); return (h ? h + ' h ' : '') + (m % 60) + ' min'; }
+
+  /* ---------------- Places ---------------- */
+  var CITIES = {
+    'london': ['LHR', 'London Heathrow', 0], 'manchester': ['MAN', 'Manchester', 60], 'edinburgh': ['EDI', 'Edinburgh', 80],
+    'glasgow': ['GLA', 'Glasgow', 80], 'lisbon': ['LIS', 'Lisbon', 165], 'paris': ['CDG', 'Paris', 75], 'rome': ['FCO', 'Rome', 150],
+    'barcelona': ['BCN', 'Barcelona', 125], 'amsterdam': ['AMS', 'Amsterdam', 70], 'berlin': ['BER', 'Berlin', 110],
+    'dublin': ['DUB', 'Dublin', 75], 'madrid': ['MAD', 'Madrid', 140], 'new york': ['JFK', 'New York', 470],
+    'porto': ['OPO', 'Porto', 140], 'krakow': ['KRK', 'Kraków', 150], 'nice': ['NCE', 'Nice', 120], 'athens': ['ATH', 'Athens', 225]
+  };
+  function findCity(t, after) {
+    var best = null;
+    Object.keys(CITIES).forEach(function (k) {
+      var re = new RegExp((after ? '\\b' + after + '\\s+' : '\\b') + k + '\\b');
+      if (re.test(t)) best = k;
+    });
+    return best;
+  }
+
+  /* ---------------- Cards (the kit) ---------------- */
+
+  // AI note: one short sentence that frames what the cards below are.
+  function aiNote(text) {
+    return '<div class="ai-note">' + '<span class="ai-note__icon">' + ic('sparkle') + '</span><p class="body">' + text + '</p></div>';
+  }
+
+  // GROUP LABEL: heading over a run of Flight cards. sortable = the traveller can re-sort the run.
+  function groupLabel(title, hint, sortable) {
+    var sort = sortable ? '<label class="sort caption"><span class="muted">Sort</span><select class="pdg-input sort-select caption" aria-label="Sort these flights">' +
+      [['best', 'Best first'], ['price', 'Cheapest'], ['dep', 'Leaves first'], ['arr', 'Lands first'], ['mins', 'Shortest']].map(function (o, i) { return '<option value="' + o[0] + '"' + (o[0] === sortable ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' : '';
+    return '<div class="group-label"><div><h3 class="h4">' + title + '</h3>' + (hint ? '<span class="caption">' + hint + '</span>' : '') + '</div>' + sort + '</div>';
+  }
+  // Re-sorts the Flight cards that follow a group label, in place.
+  function sortRun(select) {
+    var label = select.closest('.group-label'), run = [], el = label.nextElementSibling;
+    while (el && el.classList.contains('flight')) { run.push(el); el = el.nextElementSibling; }
+    var k = select.value === 'best' ? 'order' : select.value;
+    run.sort(function (a, b) { return (+a.dataset[k]) - (+b.dataset[k]); });
+    var after = label;
+    run.forEach(function (c) { after.after(c); after = c; });
+  }
+  if (typeof document !== 'undefined') document.addEventListener('change', function (e) { if (e.target.classList && e.target.classList.contains('sort-select')) sortRun(e.target); });
+
+  function badge(type, text) { return '<span class="pdg-badge pdg-badge--' + type + ' small">' + text + '</span>'; }
+
+  // FLIGHT CARD: the common factor shared by every case.
+  // f = { airline, code, from:[code,city], to:[code,city], dep:Date, mins, stops, via, price, badges:[], facts:[], primary, half }
+  function flightCard(f) {
+    var arr = addMin(f.dep, f.mins);
+    var plus = dayDiff(arr) - dayDiff(f.dep);
+    var logo = f.airline.split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2);
+    var stops = f.stops ? f.stops + ' stop' + (f.via ? ' · ' + f.via : '') : 'Direct';
+    return '<article class="pdg-card flight' + (f.half ? ' half' : '') + '" data-order="' + (f.order || 0) + '" data-price="' + f.price + '" data-dep="' + f.dep.getTime() + '" data-arr="' + arr.getTime() + '" data-mins="' + f.mins + '">' +
+      '<div class="flight__top"><div class="airline"><span class="airline__logo caption" aria-hidden="true">' + logo + '</span>' +
+        '<div><p class="caption strong">' + f.airline + '</p><p class="small muted">' + f.code + ' · ' + dayLabel(f.dep) + '</p></div></div>' +
+        (f.badges && f.badges.length ? '<div class="row">' + f.badges.join('') + '</div>' : '') + '</div>' +
+      '<div class="route">' +
+        '<div class="route__end"><span class="route__time">' + hm(f.dep) + '</span><span class="caption muted">' + f.from[0] + ' · ' + f.from[1] + '</span></div>' +
+        '<div class="route__mid"><span class="small">' + dur(f.mins) + '</span><span class="route__line">' + (f.stops ? '<i></i>' : '') + '</span><span class="small">' + stops + '</span></div>' +
+        '<div class="route__end route__end--arr"><span class="route__time">' + hm(arr) + (plus ? '<sup class="small"> +' + plus + '</sup>' : '') + '</span><span class="caption muted">' + f.to[0] + ' · ' + f.to[1] + '</span></div>' +
+      '</div>' +
+      '<div class="flight__bottom"><div class="flight__facts small">' + (f.facts || []).join('') + '</div>' +
+        '<div class="flight__buy"><span class="price">£' + f.price + '<small>per person</small></span>' +
+        '<button class="pdg-btn ' + (f.primary ? 'pdg-btn--primary' : 'pdg-btn--secondary') + ' body" type="button">Select</button></div></div>' +
+    '</article>';
+  }
+  function fact(icon, text) { return '<span>' + ic(icon) + text + '</span>'; }
+
+  // HIGHLIGHT CARD: one standout answer (used for Cheapest / Earliest).
+  function highlightCard(h) {
+    var arr = addMin(h.dep, h.mins);
+    return '<article class="pdg-card highlight' + (h.labels && h.labels.length > 1 ? '' : ' half') + '">' +
+      '<div class="row">' + (h.labels || [[h.icon, h.label]]).map(function (l) { return '<span class="highlight__label small">' + ic(l[0]) + l[1] + '</span>'; }).join('') + '</div>' +
+      '<div class="spread"><div><p class="highlight__dest">' + h.to[1] + '</p><p class="caption muted">' + h.from[0] + ' → ' + h.to[0] + ' · ' + h.airline + '</p></div>' +
+        '<span class="price">£' + h.price + '</span></div>' +
+      '<dl class="facts caption">' +
+        '<div><dt>Date</dt><dd>' + dayLabel(h.dep) + '</dd></div>' +
+        '<div><dt>Departs</dt><dd>' + hm(h.dep) + ' → ' + hm(arr) + '</dd></div>' +
+        '<div><dt>Duration</dt><dd>' + dur(h.mins) + '</dd></div>' +
+        '<div><dt>Stops</dt><dd>' + (h.stops ? h.stops + ' stop' : 'Direct') + '</dd></div>' +
+      '</dl>' +
+      (h.note ? '<p class="caption muted">' + h.note + '</p>' : '') +
+      '<div class="pdg-card__actions"><button class="pdg-btn pdg-btn--primary body" type="button">Select ' + h.to[1] + '</button></div>' +
+    '</article>';
+  }
+
+  // TRIP CARD: everything the AI understood, as chips the traveller can tap to change.
+  // items = [{ slot, text }] ; needs = [{ id, text }] (removable)
+  function tripCard(items, needs) {
+    return '<div class="trip"><span class="small muted">Your trip</span>' +
+      items.map(function (k) { return '<button type="button" class="trip__chip caption" data-edit="' + k.slot + '" aria-label="Change ' + esc(k.text) + '">' + esc(k.text) + ic('pen', 'icon trip__icon') + '</button>'; }).join('') +
+      (needs || []).map(function (n) { return '<button type="button" class="trip__chip trip__chip--need caption" data-drop="' + n.id + '" aria-label="Remove ' + esc(n.text) + '">' + esc(n.text) + '<span aria-hidden="true" class="trip__x">×</span></button>'; }).join('') +
+    '</div>';
+  }
+
+  // STATUS CARD: what's happening, in one line, with a worded badge.
+  function statusCard(s) {
+    return '<article class="pdg-card status status--' + s.type + (s.half ? ' half' : '') + '">' +
+      '<span class="status__icon">' + ic(s.icon) + '</span>' +
+      '<div class="status__body"><div class="row">' + badge(s.type, s.badge) + '</div>' +
+        '<h3 class="h4 pdg-card__title">' + s.title + '</h3><p class="body muted">' + s.body + '</p>' + (s.extra || '') + '</div>' +
+    '</article>';
+  }
+
+  // AIRPORT CARD: nearest place you can actually fly from, with a simple map.
+  function airportCard(a) {
+    a = a || { you: 'Edinburgh', code: 'GLA', name: 'Glasgow', miles: 47, drive: '1 h 10 min', road: 'M8', roadNote: 'M8 open, slow near Harthill' };
+    var t = 'style="font:600 11px var(--font-sans);fill:var(--text)"', m = 'style="font:400 10px var(--font-sans);fill:var(--text-muted)"';
+    var map = '<svg class="map" viewBox="0 0 320 120" role="img" aria-label="Map: ' + esc(a.you) + ' to ' + esc(a.name) + ' airport, ' + a.miles + ' miles on the ' + esc(a.road) + '">' +
+      '<path d="M262 64 C 220 70, 200 50, 160 58 S 90 70, 62 60" style="fill:none;stroke:var(--text);stroke-width:3;stroke-linecap:round"/>' +
+      '<text x="160" y="48" text-anchor="middle" style="font:600 11px var(--font-sans);fill:var(--text-muted)">' + esc(a.road) + ' · ' + a.miles + ' mi</text>' +
+      '<circle cx="262" cy="64" r="9" style="fill:var(--surface);stroke:var(--text);stroke-width:2"/><circle cx="262" cy="64" r="3.5" style="fill:var(--text)"/>' +
+      '<text x="262" y="92" text-anchor="middle" ' + t + '>You</text><text x="262" y="106" text-anchor="middle" ' + m + '>' + esc(a.you) + '</text>' +
+      '<rect x="48" y="46" width="28" height="28" rx="6" style="fill:var(--primary);stroke:var(--text);stroke-width:1"/>' +
+      '<g transform="translate(53 51) scale(.75)" style="fill:none;stroke:var(--on-primary);stroke-width:2;stroke-linecap:round;stroke-linejoin:round">' + P.plane + '</g>' +
+      '<text x="62" y="92" text-anchor="middle" ' + t + '>' + esc(a.code) + '</text><text x="62" y="106" text-anchor="middle" ' + m + '>' + esc(a.name) + '</text>' +
+    '</svg>';
+    return '<article class="pdg-card half">' +
+      '<div class="spread"><p class="caption muted">Nearest open airport</p>' + badge('success', 'Open') + '</div>' +
+      '<h3 class="h4 pdg-card__title">' + esc(a.name) + ' (' + esc(a.code) + ')</h3>' + map +
+      '<div class="flight__facts caption">' + fact('car', a.drive + ' by car') + fact('pin', a.miles + ' miles') + fact('wind', esc(a.roadNote)) + '</div>' +
+      '<div class="pdg-card__actions"><button class="pdg-btn pdg-btn--secondary body" type="button">' + ic('car') + 'Get directions</button></div>' +
+    '</article>';
+  }
+
+  // BOOKING CARD: we don't know their booking, so ask for it without blocking.
+  function bookingCard() {
+    return '<article class="pdg-card half">' +
+      '<p class="caption muted">Already booked?</p>' +
+      '<h3 class="h4 pdg-card__title">Rebook your flight instead</h3>' +
+      '<p class="body muted">We can\'t see which flight you\'re on. Add your booking reference and we\'ll check rebooking first. It may cost less than a new ticket.</p>' +
+      '<form class="inline-form" onsubmit="return false"><label class="visually-hidden" for="ref">Booking reference</label>' +
+        '<input class="pdg-input body" id="ref" placeholder="e.g. PDG7KQ" maxlength="6">' +
+        '<button class="pdg-btn pdg-btn--secondary body" type="submit">Find booking</button></form>' +
+    '</article>';
+  }
+
+  // LIST CARD: a titled list of options (stays, other transport, safety).
+  function listCard(c) {
+    return '<article class="pdg-card' + (c.half ? ' half' : '') + '">' +
+      '<div class="row">' + ic(c.icon) + '<p class="caption muted">' + c.kicker + '</p></div>' +
+      '<h3 class="h4 pdg-card__title">' + c.title + '</h3>' +
+      '<ul class="list">' + c.items.map(function (i) {
+        return '<li><div class="list__main"><span class="body strong">' + i[0] + '</span><span class="caption muted">' + i[1] + '</span></div>' + (i[2] || '') + '</li>';
+      }).join('') + '</ul>' +
+      (c.action ? '<div class="pdg-card__actions"><button class="pdg-btn pdg-btn--secondary body" type="button">' + c.action + '</button></div>' : '') +
+    '</article>';
+  }
+
+  // ALERT CARD: one switch so the traveller doesn't have to keep checking.
+  function alertCard(title, body) {
+    return '<article class="pdg-card"><label class="toggle"><span class="status__body"><span class="row">' + ic('bell') + '<span class="body strong">' + title + '</span></span>' +
+      '<span class="caption muted">' + body + '</span></span><input type="checkbox" role="switch"></label></article>';
+  }
+
+  /* ---------------- The four cases ---------------- */
+  var CASES = {};
+
+  // Shared: what the AI understood, as Trip card chips
+  function tripItems(sl) {
+    var out = [];
+    function place(k) { return cityName(k).replace(' Heathrow', ''); }
+    if (CITIES[sl.from]) out.push({ slot: 'from', text: 'From ' + place(sl.from) });
+    if (sl.to === 'anywhere') out.push({ slot: 'to', text: 'To anywhere' }); else if (CITIES[sl.to]) out.push({ slot: 'to', text: 'To ' + place(sl.to) });
+    if (sl.date) out.push({ slot: 'date', text: sl.date + (sl.dates && sl.dates.assumedYear ? ' (year assumed)' : '') });
+    out.push({ slot: 'pax', text: sl.pax ? sl.pax.total + (sl.pax.total > 1 ? ' travellers' : ' traveller') : '1 adult' });
+    return out;
+  }
+  function needItems(nd) {
+    var out = [];
+    if (!nd) return out;
+    if (nd.deadline) out.push({ id: 'deadline', text: 'Land by ' + nd.deadline.label });
+    if (nd.wheelchair) out.push({ id: 'wheelchair', text: 'Wheelchair assistance' });
+    if (nd.pet) out.push({ id: 'pet', text: 'Travelling with a pet' });
+    if (nd.budget) out.push({ id: 'budget', text: 'Under £' + nd.budget + ' each' });
+    return out;
+  }
+  function trip(sl) { return tripCard(tripItems(sl), needItems(sl.needs)); }
+
+  // Rule A + Rule C: apply needs we have no card for, and keep groups together.
+  // Never drop a need silently: if no flight meets it, keep the flights and say so.
+  function applyNeeds(flights, sl, opts) {
+    var nd = sl.needs || {}, px = sl.pax || { total: 1 }, said = [];
+    // step(test, what we did, why some were left out, what to say if nothing passes, fact to add)
+    function step(test, ok, none, factTxt) {
+      var keep = flights.filter(test);
+      if (!keep.length) { said.push(none); return; }
+      var gone = flights.length - keep.length;
+      said.push(ok[0] + (gone ? ' I left out ' + gone + (gone > 1 ? ' flights ' : ' flight ') + ok[1] + '.' : ''));
+      flights = keep;
+      if (factTxt) flights.forEach(function (f) { f.facts = [fact(factTxt[0], typeof factTxt[1] === 'function' ? factTxt[1](f) : factTxt[1])].concat(f.facts || []); });
+    }
+    if (px.total > 1) step(function (f) { return (f.seats || 99) >= px.total; },
+      ['Showing flights with ' + px.total + ' seats together.', 'without enough seats'], 'No flight has ' + px.total + ' seats together, so these may split your group. Call us to hold group seats.',
+      ['seat', 'Seats for ' + px.total + ' together']);
+    if (nd.wheelchair) step(function (f) { return f.assist !== false; }, ['Every flight here has wheelchair assistance.', 'without it'], 'None of these flights confirm wheelchair assistance yet. Ask the airline before you book.', ['seat', 'Wheelchair assistance available']);
+    if (nd.pet) step(function (f) { return !!f.pets; }, ['Showing flights that take pets in the cabin.', 'that don\'t'], 'None of these flights take pets in the cabin. You may need a pet transport service.', ['tag', 'Pets allowed in the cabin']);
+    if (nd.budget) step(function (f) { return f.price <= nd.budget; }, ['Showing flights under £' + nd.budget + ' each.', 'over budget'], 'Nothing is under £' + nd.budget + ' each, so here are the closest prices.', null);
+    if (nd.deadline && !opts.noDeadline) {
+      var by = function (f) { var a = addMin(f.dep, f.mins); return a.getHours() * 60 + a.getMinutes() <= nd.deadline.h * 60 + nd.deadline.m; };
+      step(by, ['Showing flights that land by ' + nd.deadline.label + ', earliest arrival first.', 'that land later'], 'No flight lands by ' + nd.deadline.label + '. These are the earliest arrivals.', null);
+      flights.sort(function (a, b) { return addMin(a.dep, a.mins) - addMin(b.dep, b.mins); });
+      flights.forEach(function (f) { if (by(f)) f.badges = [badge('success', 'Lands in time')]; });
+      opts.sorted = 'arr';
+    }
+    return { flights: flights, said: said };
+  }
+
+  // 1. BASELINE: a complete search (from, to, when). Just the common factor, sorted best first.
+  CASES.baseline = function (t, ctx) {
+    var sl = (ctx && ctx.slots) || slotsOf(t);
+    var fromK = CITIES[sl.from] ? sl.from : 'london';
+    var toK = CITIES[sl.to] ? sl.to : 'lisbon';
+    var from = CITIES[fromK], to = CITIES[toK];
+    if (fromK === toK) { from = CITIES[toK === 'edinburgh' ? 'london' : 'edinburgh']; }
+    var mins = Math.abs(to[2] - from[2]) + (fromK === 'london' || toK === 'london' ? 0 : 60) || 75;
+    var dates = sl.dates || { start: at(1, '00:00') };
+    var day = Math.max(dayDiff(dates.start), dates.flexible ? 1 : 0);
+    var px = sl.pax || { total: 1, label: '' };
+    var base = Math.round(35 + mins * 0.45);
+    function total(price) { return px.total > 1 ? [fact('tag', '£' + (price * px.total) + ' for ' + px.total + ' travellers')] : []; }
+    var f = function (o, back) {
+      o.from = back ? [to[0], to[1]] : [from[0], from[1]]; o.to = back ? [from[0], from[1]] : [to[0], to[1]]; return o;
+    };
+    var all = [
+      f({ order: 1, airline: 'Skylark Air', code: 'SK 310', dep: at(day, '06:50'), mins: mins, stops: 0, price: base + 22, seats: 9, assist: true, pets: true, badges: [badge('success', 'Best overall')], facts: [fact('seat', 'Cabin bag included')] }),
+      f({ order: 2, airline: 'Northline', code: 'NL 842', dep: at(day, '11:40'), mins: mins + 5, stops: 0, price: base + 38, seats: 40, assist: true, pets: false, facts: [fact('seat', 'Cabin bag included')] }),
+      f({ order: 3, airline: 'Coastal Jet', code: 'CJ 117', dep: at(day, '06:05'), mins: mins + 95, stops: 1, via: 'AMS', price: base, seats: 25, assist: false, pets: false, badges: [badge('neutral', 'Cheapest')], facts: [fact('clock', '1 h 10 min connection')] }),
+      f({ order: 4, airline: 'Skylark Air', code: 'SK 318', dep: at(day, '18:55'), mins: mins, stops: 0, price: base + 61, seats: 3, assist: true, pets: true, facts: [fact('seat', '3 seats left')] })
+    ];
+    var opts = {};
+    var res = applyNeeds(all, sl, opts), flights = res.flights;
+    flights.forEach(function (x) { x.facts = total(x.price).concat(x.facts); });
+    flights[0].primary = true;
+    var who = px.total > 1 ? ' for ' + px.total + ' travellers (' + px.label + ')' : '';
+    var when = dayLabel(flights[0].dep).replace(/^(Today|Tomorrow), /, '');
+    var count = flights.length === 1 ? '1 flight' : flights.length + ' flights';
+    var note = 'Here ' + (flights.length === 1 ? 'is ' : 'are ') + count + ' from ' + from[1] + ' to ' + to[1] + ' on ' + when + who + '. ' + (opts.sorted ? '' : 'Best overall is first. ') + res.said.join(' ');
+    if (dates.end) note += ' Return flights on ' + dayLabel(dates.end).replace(/^(Today|Tomorrow), /, '') + ' are below.';
+    if (dates.assumedYear) note += ' I\'ve taken your dates as ' + dates.start.getFullYear() + ', the next time they come round.';
+    if (px.total >= 10) note += ' Group bookings of 10 or more can hold seats for 48 hours.';
+    else if (px.senior || px.child || px.infant || px.student) note += ' Seats together' + (px.senior ? ' and assistance' : '') + ' can be added when you book.';
+    var out = [aiNote(note), trip(sl), groupLabel(from[1] + ' → ' + to[1], 'Outbound · ' + dayLabel(flights[0].dep), flights.length > 1 ? (opts.sorted || 'best') : null)].concat(flights.map(function (x) { return flightCard(x); }));
+    if (dates.end) {
+      var rd = Math.max(dayDiff(dates.end), day);
+      var back = applyNeeds([
+        f({ order: 1, airline: 'Skylark Air', code: 'SK 311', dep: at(rd, '10:20'), mins: mins, stops: 0, price: base + 18, seats: 12, assist: true, pets: true, badges: [badge('success', 'Best overall')], facts: [fact('seat', 'Cabin bag included')] }, true),
+        f({ order: 2, airline: 'Northline', code: 'NL 845', dep: at(rd, '16:45'), mins: mins + 5, stops: 0, price: base + 9, seats: 38, assist: true, pets: false, badges: [badge('neutral', 'Cheapest')], facts: [fact('seat', 'Cabin bag included')] }, true)
+      ], sl, { noDeadline: true }).flights;
+      back.forEach(function (x) { x.facts = total(x.price).concat(x.facts); });
+      back[0].primary = true;
+      out = out.concat([groupLabel(to[1] + ' → ' + from[1], 'Return · ' + dayLabel(back[0].dep), back.length > 1 ? 'best' : null)]).concat(back.map(function (x) { return flightCard(x); }));
+    }
+    return out;
+  };
+
+  /* ---------------- Places for emergencies: your airport and the next nearest one ---------------- */
+  var NEAR = {
+    edinburgh: { home: ['EDI', 'Edinburgh Airport'], alt: ['GLA', 'Glasgow'], miles: 47, drive: '1 h 10 min', road: 'M8', roadNote: 'M8 open, slow near Harthill' },
+    glasgow: { home: ['GLA', 'Glasgow Airport'], alt: ['EDI', 'Edinburgh'], miles: 47, drive: '1 h 10 min', road: 'M8', roadNote: 'M8 open, slow near Harthill' },
+    london: { home: ['LHR', 'Heathrow'], alt: ['STN', 'London Stansted'], miles: 52, drive: '1 h 15 min', road: 'M25', roadNote: 'M25 open, busy near the M11' },
+    manchester: { home: ['MAN', 'Manchester Airport'], alt: ['LPL', 'Liverpool'], miles: 35, drive: '55 min', road: 'M62', roadNote: 'M62 open, slow near Warrington' },
+    paris: { home: ['CDG', 'Charles de Gaulle'], alt: ['ORY', 'Paris Orly'], miles: 30, drive: '50 min', road: 'A86', roadNote: 'A86 open' },
+    amsterdam: { home: ['AMS', 'Schiphol'], alt: ['RTM', 'Rotterdam'], miles: 40, drive: '55 min', road: 'A4', roadNote: 'A4 open' }
+  };
+  function nearOf(k) {
+    if (NEAR[k]) return NEAR[k];
+    var c = CITIES[k] || CITIES.edinburgh;
+    return { home: [c[0], c[1] + ' Airport'], alt: ['REG', 'the regional airport'], miles: 50, drive: '1 h 15 min', road: 'the main road', roadNote: 'Main road open' };
+  }
+  function cityName(k) { return CITIES[k] ? CITIES[k][1] : k; }
+  function mkPlace(k) { return [CITIES[k][0], CITIES[k][1]]; }
+  function flightMins(a, b) { return Math.max(Math.abs(CITIES[a][2] - CITIES[b][2]), 50); }
+
+  // 2a. EMERGENCY: flights are still reachable. Speed and certainty beat price.
+  CASES.emergency = function (t, ctx) {
+    var sl = (ctx && ctx.slots) || {};
+    var youK = CITIES[sl.from] ? sl.from : 'edinburgh';
+    var n = nearOf(youK), you = cityName(youK);
+    var alt = [n.alt[0], n.alt[1]];
+    var d1 = soon(150), d2 = soon(190), d3 = soon(245);
+    var flights;
+    if (CITIES[sl.to] && sl.to !== youK) {
+      var to = mkPlace(sl.to), m = flightMins(youK, sl.to);
+      flights = [
+        { airline: 'Northline', code: 'NL 207', from: alt, to: to, dep: d1, mins: m, stops: 0, price: 164, primary: true, badges: [badge('success', 'Next you can make'), badge('warning', '4 seats left')], facts: [fact('clock', 'Leaves in ' + until(d1)), fact('alert', 'Check-in closes ' + hm(addMin(d1, -45)))] },
+        { airline: 'Skylark Air', code: 'SK 552', from: alt, to: to, dep: d2, mins: m + 85, stops: 1, via: 'AMS', price: 131, badges: [badge('neutral', '11 seats left')], facts: [fact('clock', 'Leaves in ' + until(d2))] },
+        { airline: 'Coastal Jet', code: 'CJ 390', from: alt, to: to, dep: d3, mins: m + 5, stops: 0, price: 98, badges: [badge('neutral', '20+ seats left')], facts: [fact('clock', 'Leaves in ' + until(d3))] }
+      ];
+    } else {
+      var dests = ['london', 'amsterdam', 'dublin', 'paris'].filter(function (k) { return k !== youK; }).slice(0, 3);
+      flights = dests.map(function (k, i) {
+        var dep = [d1, d2, d3][i];
+        return { airline: ['Northline', 'Skylark Air', 'Coastal Jet'][i], code: ['NL 207', 'SK 552', 'CJ 390'][i], from: alt, to: mkPlace(k), dep: dep, mins: flightMins(youK, k), stops: 0, price: [164, 131, 98][i], primary: i === 0,
+          badges: i === 0 ? [badge('success', 'Next you can make'), badge('warning', '4 seats left')] : [badge('neutral', ['', '11 seats left', '20+ seats left'][i])],
+          facts: [fact('clock', 'Leaves in ' + until(dep)), i === 0 ? fact('alert', 'Check-in closes ' + hm(addMin(dep, -45))) : fact('plane', 'Onward connections ' + (i === 1 ? 'tonight' : 'tomorrow'))] };
+      });
+    }
+    var toTxt = CITIES[sl.to] ? ' to ' + cityName(sl.to) : '';
+    flights.forEach(function (f, i) { f.order = i + 1; });
+    var extra = '';
+    // Rule B: emergency wins, but respect "cheapest" among the flights they can make.
+    if (/\bcheap(est)?\b/.test(t)) {
+      var c = flights.slice().sort(function (a, b) { return a.price - b.price; })[0];
+      c.badges = [badge('success', 'Cheapest you can make')].concat((c.badges || []).filter(function (b) { return b.indexOf('Next you can make') === -1 && b.indexOf('neutral') === -1; }));
+      extra = ' The cheapest one you can make is ' + c.code + ' at £' + c.price + '. Use Sort to put it first.';
+    }
+    return [
+      aiNote(n.home[1] + ' has stopped departures because of the weather. ' + n.alt[1] + ' is still flying, so here are the next flights' + toTxt + ' you can reach in time.' + extra),
+      trip(sl),
+      statusCard({ type: 'warning', icon: 'wind', badge: 'Disrupted', title: n.home[1] + ' (' + n.home[0] + '): departures suspended', body: 'Gusts up to 70 mph. Departures are expected to restart around 22:00, but this may change.' }),
+      airportCard({ you: you, code: n.alt[0], name: n.alt[1], miles: n.miles, drive: n.drive, road: n.road, roadNote: n.roadNote }),
+      bookingCard(),
+      groupLabel('Next flights from ' + n.alt[1] + toTxt, 'Soonest first, including the drive', 'best')
+    ].concat(flights.map(function (x) { return flightCard(x); }));
+  };
+
+  // 2b. EMERGENCY, NO FLIGHT WORKS: only now try other transport, a hotel nearby and safety.
+  CASES['emergency-none'] = function (t, ctx) {
+    var sl = (ctx && ctx.slots) || {};
+    var youK = CITIES[sl.from] ? sl.from : 'edinburgh';
+    var n = nearOf(youK), you = cityName(youK);
+    var dest = CITIES[sl.to] && sl.to !== youK ? cityName(sl.to) : 'London';
+    return [
+      aiNote('There are no flights you can safely reach tonight. Here are other ways to travel, places to stay nearby and how to stay safe.'),
+      trip(sl),
+      statusCard({ type: 'error', icon: 'alert', badge: 'No flights tonight', title: 'You can\'t reach a flight tonight', body: n.home[1] + ' is closed and the ' + n.road + ' to ' + n.alt[1] + ' is shut because of fallen trees.' }),
+      listCard({ icon: 'train', kicker: 'Other ways to travel', title: 'Earliest ways to ' + dest, items: [
+        ['Train to ' + dest, 'Leaves 06:15 · Services resume at 06:00', '<span class="body strong">£64</span>'],
+        ['Coach to ' + n.alt[1] + ' airport', 'Leaves 06:40 · If the ' + n.road + ' reopens', '<span class="body strong">£12</span>'],
+        ['First flight from ' + n.home[1], 'Leaves 07:05 to ' + dest + ' · If the airport reopens', '<span class="body strong">£96</span>']
+      ] }),
+      listCard({ half: true, icon: 'bed', kicker: 'Stay nearby tonight', title: 'Hotels in ' + you + ' with rooms free', items: [
+        ['Station Hotel', '0.4 mi walk · Free cancellation', '<span class="body strong">£89</span>'],
+        ['Old Town Rooms', '0.9 mi · Breakfast included', '<span class="body strong">£112</span>'],
+        ['Airport Lodge', '6 mi · Taxi about 25 min', '<span class="body strong">£74</span>']
+      ], action: 'See all places to stay' }),
+      listCard({ half: true, icon: 'shield', kicker: 'Stay safe', title: 'Amber wind warning until 06:00', items: [
+        ['Avoid travelling tonight', 'Roads and rail are disrupted'],
+        ['Stay away from trees and coastal paths', 'Gusts up to 70 mph'],
+        ['In an emergency, call 999', 'Updated 10 minutes ago']
+      ] }),
+      alertCard('Tell me as soon as a flight opens up', 'We\'ll message you if ' + n.home[1] + ' reopens or the road to ' + n.alt[1] + ' clears.')
+    ];
+  };
+
+  // 3. SPONTANEOUS: destination is "anywhere". Cheapest AND earliest side by side, then cheapest → priciest.
+  CASES.spontaneous = function (t, ctx) {
+    var sl = (ctx && ctx.slots) || {};
+    var fromK = CITIES[sl.from] ? sl.from : 'london';
+    var lon = fromK === 'london';
+    var A = lon ? { gw: ['LGW', 'London Gatwick'], hr: ['LHR', 'London Heathrow'], lt: ['LTN', 'London Luton'], st: ['STN', 'London Stansted'] } : null;
+    var home = mkPlace(fromK);
+    function ap(key) { return lon ? A[key] : home; }
+    var pool = [
+      ['krakow', 19, at(2, '06:10'), 'lt', 'Skylark Air', 'SK 770', 'Cabin bag costs extra.'], ['amsterdam', 84, soon(130), 'hr', 'Northline', 'NL 120', ''],
+      ['porto', 27, at(1, '06:30'), 'st', 'Coastal Jet', 'CJ 731', ''], ['dublin', 34, soon(260), 'gw', 'Northline', 'NL 618', ''],
+      ['barcelona', 41, at(1, '09:10'), 'gw', 'Skylark Air', 'SK 904', ''], ['nice', 58, at(1, '13:25'), 'hr', 'Coastal Jet', 'CJ 288', ''],
+      ['athens', 79, at(2, '07:50'), 'hr', 'Northline', 'NL 402', ''], ['lisbon', 46, at(1, '15:40'), 'gw', 'Skylark Air', 'SK 512', '']
+    ].filter(function (x) { return x[0] !== fromK; }).map(function (x) {
+      return { airline: x[4], code: x[5], from: ap(x[3]), to: mkPlace(x[0]), dep: x[2], mins: flightMins(fromK, x[0]), stops: 0, price: x[1], note: x[6], seats: 30, assist: true, pets: x[1] < 50 };
+    });
+    var res = applyNeeds(pool, sl, { noDeadline: true });
+    pool = res.flights;
+    var cheap = pool.slice().sort(function (a, b) { return a.price - b.price || a.dep - b.dep; })[0];
+    var earl = pool.slice().sort(function (a, b) { return a.dep - b.dep || a.price - b.price; })[0];
+    function hl(f, labels) {
+      var note = (f.dep - NOW < 864e5 ? 'Leaves in ' + until(f.dep) + '. Check-in closes ' + hm(addMin(f.dep, -45)) + '.' : 'Leaves ' + dayLabel(f.dep) + '.') + (f.note ? ' ' + f.note : '');
+      return highlightCard({ labels: labels, airline: f.airline, from: f.from, to: f.to, dep: f.dep, mins: f.mins, stops: 0, price: f.price, note: note });
+    }
+    var pair = cheap === earl ? [hl(cheap, [['tag', 'Cheapest'], ['zap', 'Earliest']])] : [hl(cheap, [['tag', 'Cheapest']]), hl(earl, [['zap', 'Earliest']])];
+    var more = pool.filter(function (f) { return f !== cheap && f !== earl; }).sort(function (a, b) { return a.price - b.price; }).map(function (f, i) {
+      f.order = i + 1; f.facts = [f.dep - NOW < 864e5 ? fact('clock', 'Leaves in ' + until(f.dep)) : fact('tag', 'Cabin bag included')]; return f;
+    });
+    var whenTxt = sl.dates && !sl.dates.flexible ? ' around ' + sl.date : '';
+    var lead = cheap === earl ? 'The cheapest flight from ' + cityName(fromK) + ' is also the earliest, so here it is once.' : 'You said cheapest and earliest, so here\'s one of each from ' + cityName(fromK) + whenTxt + '.';
+    var out = [aiNote(lead + ' ' + res.said.join(' ') + (more.length ? ' Below them are more ideas, cheapest first.' : '')), trip(sl)].concat(pair);
+    if (more.length) out = out.concat([groupLabel('More places to go', 'Cheapest → priciest', 'price')]).concat(more.map(function (x) { return flightCard(x); }));
+    return out;
+  };
+
+  // QUESTION CARD: exactly one clarifying question, answered with a tap or by typing.
+  // q = { kicker, title, known:[text], note, options:[[label, fullRequest]], half }
+  function questionCard(q) {
+    return '<article class="pdg-card question' + (q.half ? ' half' : '') + '"><p class="caption muted">' + (q.kicker || 'One question') + '</p>' +
+      (q.known && q.known.length ? '<div class="row known small"><span class="muted">So far</span>' + q.known.map(function (k) { return k.slot ? '<button type="button" class="known__chip" data-edit="' + k.slot + '" aria-label="Change ' + esc(k.text) + '">' + esc(k.text) + '</button>' : '<span class="known__chip">' + esc(k.text || k) + '</span>'; }).join('') + '</div>' : '') +
+      '<h3 class="h4 pdg-card__title">' + q.title + '</h3>' +
+      (q.note ? '<p class="caption muted">' + q.note + '</p>' : '') +
+      '<div class="pill-row">' + q.options.map(function (a) { return '<button class="pill caption" type="button" data-say="' + esc(a[0]) + '" data-run="' + esc(a[1]) + '">' + esc(a[0]) + '</button>'; }).join('') + '</div></article>';
+  }
+
+  // SUGGESTIONS CARD: example requests the traveller can tap to run.
+  function suggestCard(s) {
+    return '<article class="pdg-card' + (s.half === false ? '' : ' half') + '"><p class="caption muted">' + (s.kicker || 'Or try asking') + '</p><h3 class="h4 pdg-card__title">' + (s.title || 'Things I can help with') + '</h3>' +
+      '<div class="suggest">' + s.examples.map(function (e) { return '<button class="caption" type="button" data-run="' + esc(e) + '"><span>' + esc(e) + '</span>' + ic('arrow') + '</button>'; }).join('') + '</div></article>';
+  }
+
+  var BRIEF = {
+    emergency: 'I’m stuck in a windstorm. I need the next available flight I can get on from the closest airport, as quickly as possible.',
+    spontaneous: 'I want to go somewhere, anywhere. Find me the cheapest and earliest flight available from where I am.'
+  };
+  var EX = {
+    baseline: 'Flights from London to Lisbon on Friday',
+    emergency: 'I’m stuck in a windstorm in Edinburgh. I need the next available flight to London from the closest airport, as quickly as possible.',
+    'emergency-none': 'I’m stuck in a windstorm in Edinburgh and all the roads are blocked. I need the next available flight to London.',
+    spontaneous: 'I want to go somewhere, anywhere. Find me the cheapest and earliest flight available from London.',
+    ask: 'travelling to paris with 2 children 1 elderly, 1 adult 2feb-5feb',
+    unknown: 'What should I pack for a wedding?'
+  };
+
+  // ASK: a trip request with something missing. Say what we got, ask ONE question.
+  var QUESTIONS = {
+    from: {
+      emergency: ['Where are you right now?', ['Edinburgh', 'Glasgow', 'London', 'Manchester']],
+      other: ['Where are you flying from?', ['London', 'Manchester', 'Edinburgh', 'Glasgow']]
+    },
+    to: {
+      emergency: ['Where do you need to get to?', ['London', 'Amsterdam', 'Dublin', 'Anywhere I can get to']],
+      other: ['Where would you like to fly to?', ['Lisbon', 'Paris', 'Rome', 'Anywhere']]
+    },
+    pax: {
+      other: ['Who\'s travelling?', ['Just me', '2 adults', '2 adults and 2 children', '4 adults']]
+    },
+    date: {
+      emergency: ['When do you need to leave?', ['As soon as possible', 'Tomorrow']],
+      spontaneous: ['When can you go?', ['As soon as possible', 'This weekend', 'Any time']],
+      other: ['When would you like to fly?', ['Today', 'Tomorrow', 'This weekend', 'Next Friday']]
+    }
+  };
+  function answerPhrase(missing, label) {
+    var l = label.toLowerCase();
+    if (missing === 'from') return 'from ' + l;
+    if (missing === 'to') return /anywhere/.test(l) ? 'anywhere' : 'to ' + l;
+    return l;
+  }
+  function knownList(sl) {
+    return tripItems(sl).filter(function (k) { return k.slot !== 'pax' || (sl.pax && sl.pax.total > 1); });
+  }
+  CASES.ask = function (t, ctx) {
+    ctx = ctx || {};
+    var sl = ctx.slots || {}, intent = ctx.intent || 'baseline', missing = ctx.missing || 'to';
+    var raw = (ctx.text || '').replace(/[.?!\s]+$/, '');
+    var set = QUESTIONS[missing], q = set[intent] || set.other;
+    var lead = {
+      emergency: 'I\'m sorry you\'re stuck. I\'ll find the fastest way out, I just need one detail first.',
+      spontaneous: 'Love it. One quick question and I\'ll find you the cheapest and the earliest.',
+      baseline: 'Happy to help. I just need one more detail.'
+    }[intent];
+    if (ctx.editing) lead = 'Sure. What should I change it to?';
+    if (ctx.retry) lead = 'Sorry, I didn\'t catch that. Could you try again? You can tap an answer too.';
+    var note = missing !== 'date' && sl.dates && sl.dates.assumedYear ? 'I\'ve assumed you mean ' + sl.dates.start.getFullYear() + ', the next time those dates come round. If not, tell me the year.' : '';
+    return [
+      aiNote(lead),
+      questionCard({ title: ctx.editing ? q[0].replace(/\?$/, ' instead?') : q[0], known: knownList(sl), note: note, options: q[1].map(function (l) { return [l, raw + ' ' + answerPhrase(missing, l)]; }) })
+    ];
+  };
+
+  // 4. UNKNOWN: not a trip at all. Say so, ask ONE question, offer example requests.
+  CASES.unknown = function () {
+    var examples = ['Get me from Manchester to Rome next Tuesday', EX.spontaneous, EX.emergency];
+    return [
+      statusCard({ type: 'warning', icon: 'help', badge: 'No answer', title: 'I don\'t have an answer for that', body: 'PDG Flights can find, compare and change flights. I couldn\'t find a trip in your request, so I don\'t want to guess.' }),
+      questionCard({ half: true, title: 'Where would you like to fly to?', options: [['Lisbon', 'to lisbon'], ['Paris', 'to paris'], ['Anywhere cheap', 'anywhere, the cheapest and earliest'], ['I\'m stuck and need to leave', 'I\'m stuck and need the next available flight']] }),
+      suggestCard({ examples: examples })
+    ];
+  };
+
+  /* =====================================================================
+     RULES: how the AI picks ONE result for a request.
+     Step 1: work out what kind of trip it is (rules 1 to 4, first match wins).
+     Step 2: check the essentials (from, to, when). If one is missing,
+             ask for it with one question and wait. Only then show the result.
+     ===================================================================== */
+  var MON = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)';
+  var MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  function mIdx(m) { return MONTHS.indexOf(m.slice(0, 3)); }
+  function mkDate(d, m, y) { var x = new Date(y, m, d); x.setHours(0, 0, 0, 0); return x; }
+  var TODAY0 = new Date(NOW); TODAY0.setHours(0, 0, 0, 0);
+
+  // Reads dates like "2 Feb", "2feb2027", "2nd February 2027", "2-5 Feb", "Feb 2", "2/2", "Friday", "tomorrow".
+  // If no year is given, takes the next time the date comes round and flags assumedYear.
+  function parseDates(t) {
+    var found = [], m, re;
+    re = new RegExp('(?<!\\d)(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:-|–|to|until)\\s*(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:of\\s*)?' + MON + '\\b\\.?\\s*(\\d{4})?', 'g');
+    if ((m = re.exec(t))) { found.push([+m[1], mIdx(m[3]), m[4]]); found.push([+m[2], mIdx(m[3]), m[4]]); }
+    if (!found.length) {
+      re = new RegExp('(?<!\\d)(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:of\\s*)?' + MON + '(?![a-z])\\.?\\s*(\\d{4})?', 'g');
+      while ((m = re.exec(t)) && found.length < 2) found.push([+m[1], mIdx(m[2]), m[3]]);
+    }
+    if (!found.length) {
+      re = new RegExp('\\b' + MON + '\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:,?\\s*(\\d{4}))?', 'g');
+      while ((m = re.exec(t)) && found.length < 2) found.push([+m[2], mIdx(m[1]), m[3]]);
+    }
+    if (!found.length) {
+      re = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/g;
+      while ((m = re.exec(t)) && found.length < 2) found.push([+m[1], +m[2] - 1, m[3] && m[3].length === 2 ? '20' + m[3] : m[3]]);
+    }
+    if (found.length) {
+      var yearGiven = found.some(function (f) { return f[2]; });
+      var given = (found.filter(function (f) { return f[2]; })[0] || [])[2];
+      var y = given ? +given : NOW.getFullYear();
+      var start = mkDate(found[0][0], found[0][1], found[0][2] ? +found[0][2] : y);
+      if (!yearGiven && start < TODAY0) start = mkDate(found[0][0], found[0][1], y + 1);
+      var end = null;
+      if (found[1]) {
+        end = mkDate(found[1][0], found[1][1], found[1][2] ? +found[1][2] : start.getFullYear());
+        if (end < start) end = mkDate(found[1][0], found[1][1], start.getFullYear() + 1);
+      }
+      if (isNaN(start)) return null;
+      var o = { day: 'numeric', month: 'short', year: 'numeric' };
+      var label = end ? (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
+        ? start.getDate() + '–' + end.toLocaleDateString('en-GB', o)
+        : start.toLocaleDateString('en-GB', o) + ' – ' + end.toLocaleDateString('en-GB', o)) : start.toLocaleDateString('en-GB', o);
+      return { start: start, end: end, assumedYear: !yearGiven && start.getFullYear() !== NOW.getFullYear(), label: label };
+    }
+    // Month on its own: "in March" -> the 1st, next time it comes round
+    m = new RegExp('\\b(?:in|during|for|this|next)\\s+' + MON + '\\b(?:\\s+(\\d{4}))?').exec(t);
+    if (m) {
+      var mi = mIdx(m[1]), yy = m[2] ? +m[2] : NOW.getFullYear(), sd = mkDate(1, mi, yy);
+      if (!m[2] && mi < NOW.getMonth()) sd = mkDate(1, mi, yy + 1);
+      return { start: sd, end: null, assumedYear: !m[2] && sd.getFullYear() !== NOW.getFullYear(), label: sd.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) };
+    }
+    // Relative words
+    var day = null, wd = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'], word = null;
+    wd.forEach(function (w, i) { if (new RegExp('\\b' + w + '\\b').test(t)) { day = (i - NOW.getDay() + 7) % 7 || 7; word = w; } });
+    if (/\b(this )?weekend\b/.test(t)) { day = (6 - NOW.getDay() + 7) % 7 || 7; word = 'this weekend'; }
+    if (/\bnext week\b/.test(t)) { day = 7; word = 'next week'; }
+    if (/\btomorrow\b/.test(t)) { day = 1; word = 'tomorrow'; }
+    if (/\b(today|tonight)\b/.test(t)) { day = 0; word = 'today'; }
+    if (day === null) {
+      if (/\b(asap|as soon as possible|earliest|soonest|next available|right now|quickly)\b/.test(t)) return { start: new Date(TODAY0), end: null, flexible: true, assumedYear: false, label: 'As soon as possible' };
+      if (/\b(any ?time|whenever|flexible|any day|any date)\b/.test(t)) { var a = new Date(TODAY0); a.setDate(a.getDate() + 1); return { start: a, end: null, flexible: true, assumedYear: false, label: 'Any time' }; }
+      return null;
+    }
+    var st = new Date(TODAY0); st.setDate(st.getDate() + day);
+    return { start: st, end: null, assumedYear: false, label: word.charAt(0).toUpperCase() + word.slice(1) };
+  }
+
+  // Reads travellers like "2 children 1 elderly, 1 adult".
+  var NUMW = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
+  function parsePax(t) {
+    var re = /\b(\d+|a|an|one|two|three|four|five|six|seven|eight|nine)\s*(adults?|grown-?ups?|children|child|kids?|teen(?:ager)?s?|elderly|seniors?|older (?:people|adults?|persons?)|pensioners?|infants?|bab(?:y|ies)|students?|pupils?|teachers?)\b/g;
+    var px = { adult: 0, senior: 0, child: 0, infant: 0, student: 0, teacher: 0 }, m, any = false;
+    if (/\b(just me|only me|on my own|by myself|solo)\b/.test(t)) { px.adult = 1; any = true; }
+    while ((m = re.exec(t))) {
+      any = true;
+      var n = /^\d+$/.test(m[1]) ? +m[1] : NUMW[m[1]], w = m[2];
+      // A later mention of the same type replaces the earlier one ("make it 2 adults")
+      if (/^(adult|grown)/.test(w)) px.adult = n;
+      else if (/^(child|kid|teen)/.test(w)) px.child = n;
+      else if (/^(infant|bab)/.test(w)) px.infant = n;
+      else if (/^(student|pupil)/.test(w)) px.student = n;
+      else if (/^teacher/.test(w)) px.teacher = n;
+      else px.senior = n;
+    }
+    if (!any) return null;
+    return paxLabel(px);
+  }
+  function paxLabel(px) {
+    px.total = px.adult + px.senior + px.child + px.infant + px.student + px.teacher;
+    var parts = [];
+    if (px.adult) parts.push(px.adult + ' adult' + (px.adult > 1 ? 's' : ''));
+    if (px.senior) parts.push(px.senior + ' senior' + (px.senior > 1 ? 's' : ''));
+    if (px.child) parts.push(px.child + (px.child > 1 ? ' children' : ' child'));
+    if (px.infant) parts.push(px.infant + ' infant' + (px.infant > 1 ? 's' : ''));
+    if (px.student) parts.push(px.student + ' student' + (px.student > 1 ? 's' : ''));
+    if (px.teacher) parts.push(px.teacher + ' teacher' + (px.teacher > 1 ? 's' : ''));
+    px.label = parts.join(', ');
+    return px;
+  }
+  // A refinement like "make it 2 adults" changes only the types it mentions.
+  function mergePax(old, nw) {
+    if (!old) return nw; if (!nw) return old;
+    var px = {};
+    ['adult', 'senior', 'child', 'infant', 'student', 'teacher'].forEach(function (k) { px[k] = nw[k] ? nw[k] : old[k]; });
+    return paxLabel(px);
+  }
+
+  // Needs we have no card for (Rule A): a deadline, a wheelchair, a pet, a budget.
+  function parseNeeds(t) {
+    var nd = {}, m;
+    m = /\b(?:by|before|no later than)\s+(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?\b/.exec(t);
+    if (m && (m[3] || m[2] || /\b(land|arrive|be (?:there|in)|meeting)\b/.test(t))) {
+      var h = +m[1] % 12 + (m[3] === 'pm' ? 12 : 0), mm = +(m[2] || 0);
+      if (!m[3] && +m[1] >= 13) h = +m[1];
+      nd.deadline = { h: h, m: mm, label: pad(h) + ':' + pad(mm) };
+    }
+    if (/\b(wheelchair|reduced mobility|mobility (?:aid|scooter)|can'?t walk far|walking frame)\b/.test(t)) nd.wheelchair = true;
+    if (/\b(dog|cat|pet|puppy|kitten)s?\b/.test(t)) nd.pet = true;
+    m = /\b(?:under|below|less than|max(?:imum)?|up to|no more than|budget(?: of| is)?)\s*£?\s*(\d{2,5})\b/.exec(t);
+    if (m) nd.budget = +m[1];
+    return Object.keys(nd).length ? nd : null;
+  }
+  var TRAVEL_RE = /\b(fly|flying|flight|flights|trip|travel|travelling|traveling|go to|get me|book|ticket|holiday|visit)\b/;
+  var URGENT_RE = /\b(emergency|urgent|asap|as soon as possible|quickly|right now|next available)\b/;
+
+  var ESSENTIALS = {
+    title: 'Every request needs a from, a to and a when',
+    order: 'Ask in this order: where to, where from, then when. For an emergency, ask where they are first.',
+    rules: [
+      'Ask for one missing detail at a time, never a form.',
+      'Show what we already understood, so the traveller doesn\'t repeat it.',
+      'Offer tap answers, but always accept a typed one.',
+      '"Anywhere" counts as a destination. "As soon as possible", "earliest" or "any time" count as a when.',
+      'Remember the answers: each one adds to the same request until the result is ready.'
+    ]
+  };
+
+  var RULES = [
+    {
+      id: 'emergency', order: 1, name: 'Emergency change', anyOf: true,
+      job: 'Get a stuck traveller moving as fast and as safely as possible.',
+      when: 'The request mentions a disruption or urgency. This wins over everything else, even if a destination or a price is mentioned.',
+      signals: [
+        { label: 'Disruption', re: /\b(storm|windstorm|wind|snow|flood|stuck|stranded|cancell?ed|delayed|diverted|strike|missed)\b/ },
+        { label: 'Urgency', re: URGENT_RE }
+      ],
+      needs: 'Where they are now, where they need to get to (or anywhere), and when. Urgency words count as when.',
+      branch: {
+        label: 'No flight can be reached',
+        re: /roads?\b.*\b(blocked|closed|shut)|no flights|can'?t (get|reach)|nothing (is )?flying|airports? (is |are )?closed/,
+        then: 'emergency-none'
+      },
+      do: [
+        'Ask where they are first, then where they need to get to. Keep each question to one tap.',
+        'Lead with what\'s happening (Status card), then the nearest airport that\'s still open.',
+        'Sort flights by the soonest one they can actually make, including the trip to the airport. Speed beats price.',
+        'We don\'t know their booking, so offer rebooking with the Booking card, without blocking the search.',
+        'Only when no flight works: try another way to travel, find a hotel nearby, and say how to stay safe.'
+      ],
+      dont: ['Show hotels or trains while a flight still works.', 'Ask anything beyond from, to and when.']
+    },
+    {
+      id: 'spontaneous', order: 2, name: 'Spontaneous',
+      job: 'Give an open-minded traveller the two answers they asked for: cheapest and earliest.',
+      when: 'The traveller has no fixed destination ("anywhere", "somewhere", "surprise me").',
+      signals: [
+        { label: 'Open destination', re: /\b(anywhere|somewhere|surprise me|don'?t mind where|any destination|wherever)\b/ },
+        { label: 'Cheapest', re: /\bcheap(est)?\b/ },
+        { label: 'Earliest', re: /\b(earliest|soonest|next)\b/ }
+      ],
+      requires: ['Open destination'],
+      needs: 'Where they\'re flying from and when. "Anywhere" is the destination.',
+      do: [
+        'Always show both Cheapest and Earliest, side by side and the same size. It\'s a dual requirement, never one or the other.',
+        'If one flight is both cheapest and earliest, show it once with both labels.',
+        'Below the pair, add more ideas sorted cheapest to priciest.'
+      ],
+      dont: ['Rank one of the pair above the other.', 'Ask where they want to go. Not knowing is the point.']
+    },
+    {
+      id: 'baseline', order: 3, name: 'Baseline', anyOf: true,
+      job: 'Answer a simple, complete search with a clean list of flights.',
+      when: 'Any other trip request: a place, a date, travellers, or words like fly, flight or trip.',
+      signals: [
+        { label: 'Destination', slot: 'to' },
+        { label: 'Origin', slot: 'from' },
+        { label: 'Date', slot: 'date' },
+        { label: 'Travellers', slot: 'paxLabel' },
+        { label: 'Travel words', re: TRAVEL_RE }
+      ],
+      needs: 'Where from, where to and when. Travellers default to one adult.',
+      do: [
+        'Open with one sentence that repeats the search back, including who\'s travelling.',
+        'Put the best overall flight first and tag the cheapest.',
+        'With a return date, show outbound flights first, then return flights.',
+        'With more than one traveller, show the total price as well as the price per person.',
+        'If the year isn\'t given, take the next time those dates come round, and say so.'
+      ],
+      dont: ['Add hotels, alerts or ideas nobody asked for.', 'Guess where they\'re flying from, where to, or when.']
+    },
+    {
+      id: 'unknown', order: 4, name: 'Unknown',
+      job: 'Be honest when we can\'t answer, and get the traveller back on track in one step.',
+      when: 'No other rule holds: there\'s no trip in the request at all.',
+      signals: [],
+      needs: 'Nothing. This is the fallback.',
+      do: [
+        'Say plainly that we don\'t have an answer.',
+        'Ask exactly one clarifying question: where would you like to fly to?',
+        'Offer a few example requests the traveller can tap.'
+      ],
+      dont: ['Guess and show flights anyway.', 'Ask more than one question at a time.']
+    }
+  ];
+
+  function slotsOf(t) {
+    var from = findCity(t, 'from') || findCity(t, 'leaving') || findCity(t, 'out of') || findCity(t, 'stuck in') || findCity(t, 'stranded in') || findCity(t, 'i\'m in') || findCity(t, 'i am in');
+    if (!from && RULES[0].signals[0].re.test(t)) from = findCity(t, 'in') || findCity(t, 'at');
+    // "London to Rome": the city right before "to" is where they're flying from
+    if (!from) from = Object.keys(CITIES).filter(function (k) { return new RegExp('\\b' + k + '\\s+(?:to|→|-)\\s+[a-z]').test(t); })[0] || null;
+    var to = findCity(t, 'to') || Object.keys(CITIES).filter(function (k) { return k !== from && new RegExp('\\b' + k + '\\b').test(t); })[0] || null;
+    if (!to && RULES[1].signals[0].re.test(t)) to = 'anywhere';
+    var dates = parseDates(t), pax = parsePax(t);
+    return { from: from, to: to, date: dates ? dates.label : null, dates: dates, pax: pax, paxLabel: pax ? pax.label : null, needs: parseNeeds(t) };
+  }
+  // Overrides: answers and edits the traveller gave later in the conversation win over the first request.
+  function applyOv(sl, ov) {
+    if (!ov) return sl;
+    if (ov.from) sl.from = ov.from;
+    if (ov.to) sl.to = ov.to;
+    if (ov.dates) { sl.dates = ov.dates; sl.date = ov.dates.label; }
+    if (ov.pax) { sl.pax = ov.paxReplace ? ov.pax : mergePax(sl.pax, ov.pax); sl.paxLabel = sl.pax.label; }
+    var nd = {}, k;
+    for (k in (sl.needs || {})) nd[k] = sl.needs[k];
+    for (k in (ov.needs || {})) nd[k] = ov.needs[k];
+    for (k in (ov.needsOff || {})) delete nd[k];
+    sl.needs = Object.keys(nd).length ? nd : null;
+    return sl;
+  }
+  // Reads an answer to a question about one slot. Returns the change, or null if we didn't catch it.
+  function readAnswer(slot, msg) {
+    var t = msg.toLowerCase(), c = findCity(t), sl = slotsOf(t), ch = {}, got = true;
+    if (slot === 'from') { if (c) ch.from = c; else got = false; }
+    else if (slot === 'to') { if (/\b(anywhere|somewhere|don'?t mind)\b/.test(t)) ch.to = 'anywhere'; else if (c) ch.to = c; else got = false; }
+    else if (slot === 'date') { if (sl.dates) ch.dates = sl.dates; else got = false; }
+    else if (slot === 'pax') { if (sl.pax) { ch.pax = sl.pax; ch.paxReplace = true; } else got = false; }
+    // Didn't answer the question but told us something else? Keep it, and ask again without "sorry".
+    if (!got) {
+      var other = readRefinement(msg);
+      if (!other) return null;
+      other.partial = true;
+      return other;
+    }
+    // Anything else they mentioned in the same breath
+    if (slot !== 'date' && sl.dates) ch.dates = sl.dates;
+    if (slot !== 'pax' && sl.pax) ch.pax = sl.pax;
+    if (sl.needs) ch.needs = sl.needs;
+    return ch;
+  }
+  // Reads a follow-up after a result ("make it 2 adults", "I use a wheelchair"). null = nothing to refine.
+  function readRefinement(msg) {
+    var t = msg.toLowerCase(), sl = slotsOf(t), ch = {}, any = false;
+    if (sl.from && /\b(from|leaving|out of)\b/.test(t)) { ch.from = sl.from; any = true; }
+    if (sl.to) { ch.to = sl.to; any = true; }
+    if (sl.dates) { ch.dates = sl.dates; any = true; }
+    if (sl.pax) { ch.pax = sl.pax; any = true; }
+    if (sl.needs) { ch.needs = sl.needs; any = true; }
+    return any ? ch : null;
+  }
+  function mergeOv(ov, ch) {
+    var o = JSON.parse(JSON.stringify(ov || {}, function (k, v) { return v; }));
+    // keep Date objects
+    if (ov && ov.dates) o.dates = ov.dates;
+    if (ch.from) o.from = ch.from;
+    if (ch.to) o.to = ch.to;
+    if (ch.dates) o.dates = ch.dates;
+    if (ch.pax) { o.pax = ch.paxReplace ? ch.pax : mergePax(o.pax, ch.pax); if (ch.paxReplace) o.paxReplace = true; }
+    if (ch.needs) { o.needs = o.needs || {}; for (var k in ch.needs) { o.needs[k] = ch.needs[k]; if (o.needsOff) delete o.needsOff[k]; } }
+    if (ch.dropNeed) { o.needsOff = o.needsOff || {}; o.needsOff[ch.dropNeed] = true; if (o.needs) delete o.needs[ch.dropNeed]; }
+    return o;
+  }
+
+  // route(text) -> { key, intent, rule, slots, missing, checks:[...], reason }
+  function route(text, ov) {
+    var t = text.toLowerCase();
+    var slots = applyOv(slotsOf(t), ov);
+    var checks = [];
+    var winner = null;
+
+    RULES.forEach(function (r) {
+      var matched = [];
+      r.signals.forEach(function (s) { if (s.slot ? slots[s.slot] && slots[s.slot] !== 'anywhere' : s.re.test(t)) matched.push(s.label); });
+      var passed, note;
+      if (r.id === 'unknown') { passed = true; note = 'Fallback when nothing else holds.'; }
+      else if (r.anyOf) { passed = matched.length > 0; note = passed ? 'Found ' + matched.join(', ').toLowerCase() + '.' : 'No ' + (r.id === 'emergency' ? 'disruption or urgency.' : 'trip details.'); }
+      else {
+        var lacking = r.requires.filter(function (x) { return matched.indexOf(x) === -1; });
+        passed = lacking.length === 0;
+        note = passed ? 'Has ' + r.requires.join(' and ').toLowerCase() + '.' : 'Missing ' + lacking.join(' and ').toLowerCase() + '.';
+      }
+      checks.push({ order: r.order, id: r.id, name: r.name, matched: matched, skipped: !!winner, note: winner ? 'Not checked: a higher rule already won.' : note });
+      if (passed && !winner) winner = r;
+    });
+
+    var intent = winner.id, key = intent, missing = null, reason;
+    if (intent !== 'unknown') {
+      // An emergency is always "as soon as possible", unless they gave a date
+      if (intent === 'emergency' && !slots.date) { slots.date = 'As soon as possible'; slots.dates = { start: new Date(TODAY0), flexible: true, label: slots.date }; }
+      if (intent === 'emergency' && !slots.to && /\banywhere\b/.test(t)) slots.to = 'anywhere';
+      var order = intent === 'emergency' ? ['from', 'to', 'date'] : ['to', 'from', 'date'];
+      var has = { from: !!slots.from, to: !!slots.to, date: !!slots.date };
+      missing = order.filter(function (k) { return !has[k]; })[0] || null;
+      var words = { from: 'where from', to: 'where to', date: 'when' };
+      checks.push({ order: '✓', id: 'essentials', name: 'Essentials: from, to, when', matched: [], skipped: false,
+        note: missing ? 'Missing ' + order.filter(function (k) { return !has[k]; }).map(function (k) { return words[k]; }).join(', ') + '. Ask about ' + words[missing] + ' first.' : 'All three are there.' });
+      if (missing) key = 'ask';
+    }
+    if (key === 'ask') reason = 'This is ' + (intent === 'emergency' ? 'an emergency' : 'a ' + winner.name.toLowerCase()) + ' request, but we don\'t know ' + { from: intent === 'emergency' ? 'where they are' : 'where they\'re flying from', to: 'where they want to go', date: 'when they want to fly' }[missing] + '. We ask one question and wait.';
+    else if (key === 'emergency') {
+      if (RULES[0].branch.re.test(t)) key = 'emergency-none';
+      reason = key === 'emergency-none' ? 'The traveller is stuck and no flight can be reached, so we show other ways to travel, a hotel nearby and safety advice.'
+        : 'The traveller is stuck and needs to move now, so we show the soonest flights they can actually make.';
+    }
+    else if (key === 'spontaneous') reason = 'No fixed destination, so we show the cheapest and the earliest flight side by side.';
+    else if (key === 'baseline') reason = 'We know where from, where to and when, so a simple list of flights answers it.';
+    else reason = 'There\'s no trip in this request. We say so, ask where they\'d like to go and offer examples.';
+    return { key: key, intent: intent, rule: winner, slots: slots, missing: missing, checks: checks, reason: reason };
+  }
+
+  // render(text, forcedKey?, extra?) -> { key, html:[cardHTML], decision }
+  function render(text, forced, extra) {
+    extra = extra || {};
+    var d = route(text, extra.ov);
+    var key = forced || d.key;
+    var ctx = { text: text, slots: d.slots, intent: d.intent === 'unknown' ? 'baseline' : d.intent, missing: d.missing, retry: extra.retry };
+    if (extra.edit) { key = 'ask'; ctx.missing = extra.edit; ctx.editing = true; }
+    if (forced === 'ask' && !d.missing && !extra.edit) ctx.missing = 'from';
+    return { key: key, html: CASES[key](text.toLowerCase(), ctx), decision: d };
+  }
+
+  var LABELS = { baseline: 'Baseline', emergency: 'Emergency change', 'emergency-none': 'Emergency: no flight works', spontaneous: 'Spontaneous', ask: 'One question', unknown: 'Unknown' };
+
+  window.PDGKit = {
+    ic: ic, esc: esc, badge: badge, fact: fact, CITIES: CITIES,
+    time: { NOW: NOW, soon: soon, at: at, hm: hm, dayLabel: dayLabel, until: until, addMin: addMin },
+    cards: {
+      aiNote: aiNote, groupLabel: groupLabel, flight: flightCard, highlight: highlightCard, status: statusCard,
+      airport: airportCard, booking: bookingCard, list: listCard, alert: alertCard, question: questionCard, suggest: suggestCard, trip: tripCard
+    },
+    CASES: CASES, RULES: RULES, ESSENTIALS: ESSENTIALS, LABELS: LABELS, EXAMPLES: EX, BRIEF: BRIEF,
+    route: route, render: render, answerPhrase: answerPhrase, findCity: findCity,
+    readAnswer: readAnswer, readRefinement: readRefinement, mergeOv: mergeOv, sortRun: sortRun
+  };
+})();
+</script>
+<script>
+(function () {
+  var K = window.PDGKit, C = K.cards, T = K.time, ic = K.ic, badge = K.badge, fact = K.fact, esc = K.esc;
+  function $(id) { return document.getElementById(id); }
+  // The four-line rule for each card, from the PDG Flights card rules doc.
+  var CARD_RULES = {"ai-note": ["The wording, and whether to repeat back what it understood.", "Every result and every question. It's always the first thing the traveller reads.", "The Unknown result, where the Status card already says what's going on.", "Reply to it in their own words."], "trip": ["Which details to show, and which needs it picked up.", "Every result: from, to, when, who, and any needs we used.", "Questions and Unknown. The Question card shows \"So far\" instead.", "Tap a detail to change it, or remove a need with ×."], "group-label": ["The heading, and the hint that says how the group is sorted.", "2 or more Flight cards in a row, or outbound and return groups.", "There's only one flight. A single flight gets no Sort control.", "Read how the list is sorted, and re-sort it."], "flight": ["Which flights, their order, the badges and up to two facts.", "The essentials are known and at least one flight works.", "No flight can be reached in time, or the destination is \"anywhere\" and the Cheapest and Earliest pair isn't shown first.", "Change the sort order, and see the total for everyone travelling."], "highlight": ["Which flight wins each label.", "\"Cheapest\" and \"earliest\" with an open destination. Always as a pair, side by side, the same size.", "The destination is fixed. Never one on its own. If one flight wins both, show one card with both labels.", "Pick either one. Neither is pre-selected."], "status": ["Warning or error, the badge wording, and the one-line reason.", "Something outside the traveller's control affects the answer. Also for Unknown.", "Everything is normal. A normal search never gets a Status card.", "See when it was last updated."], "airport": ["Which nearby airport to suggest, by drive time and whether it's open.", "Their own airport is disrupted and another can be reached in time.", "Their own airport is working, or no airport can be reached.", "Get directions, or choose a different airport."], "booking": ["Whether rebooking might be cheaper than a new ticket.", "An emergency, and we don't know their booking.", "We already know the booking, or it isn't an emergency.", "Skip it. It never blocks the flights below it."], "list": ["Which options to list, up to 3 per card, and their order.", "An emergency, and no flight can be reached in time.", "Any flight still works. Never hotels or trains next to flights that work.", "See the price and distance before choosing."], "alert": ["What to watch for, such as the airport reopening.", "There's no answer right now, but there could be one soon.", "There's a flight they can book now.", "Switch it on or off. It's always off until they choose."], "question": ["Which missing detail to ask about, the tap answers, and the \"So far\" chips.", "From, to or when is missing. Ask where to, then where from, then when. In an emergency, where they are first.", "All three are known. Never two at once, never beyond the essentials.", "Type instead of tapping, and tap a \"So far\" chip to change it."], "suggest": ["Which 2 to 4 example requests to offer.", "The request isn't a trip at all (Unknown).", "They're mid-trip, answering a question or looking at results.", "Ignore them and type their own request."]};
+
+  var lis = ['LIS', 'Lisbon'], lhr = ['LHR', 'London Heathrow'];
+  var CARDS = [
+    { id: 'ai-note', name: 'AI note', fn: 'aiNote(text)', what: 'One sentence from the AI that frames the cards below it. It comes first in every result except Unknown.',
+      props: [['text', 'One sentence, plain words']], preview: function () { return C.aiNote('Here are 4 flights from London to Lisbon on Fri 13 Nov. Best overall is first.'); } },
+    { id: 'trip', name: 'Trip card', fn: 'trip(items, needs)', what: 'Everything the AI understood, as chips. The traveller taps one to change it, or removes a need with ×.',
+      props: [['items', '[{slot, text}]: from, to, when, who'], ['needs', '[{id, text}]: needs we used, removable']], preview: function () { return C.trip([{ slot: 'from', text: 'From London' }, { slot: 'to', text: 'To Berlin' }, { slot: 'date', text: 'Monday' }, { slot: 'pax', text: '1 adult' }], [{ id: 'deadline', text: 'Land by 09:00' }]); } },
+    { id: 'group-label', name: 'Group label', fn: 'groupLabel(title, hint, sort)', what: 'A heading over a run of Flight cards, with a hint that says how they\'re sorted and a Sort control.',
+      props: [['title', 'What the group is'], ['hint', 'How it\'s sorted (optional)'], ['sort', 'Starting sort: best, price, dep, arr, mins (optional)']], preview: function () { return C.groupLabel('London → Lisbon', 'Best overall first', 'best'); } },
+    { id: 'flight', name: 'Flight card', fn: 'flight({...})', what: 'The common factor. Every flight in every result uses this card: airline, date, times, airports, duration, stops and price.',
+      props: [['airline, code', 'Who flies it'], ['from, to', '[code, city]'], ['dep, mins', 'Departure time and duration'], ['stops, via', 'Number of stops and where'], ['price', 'Per person, in £'], ['badges', 'Worded tags, e.g. Best overall'], ['facts', 'Small extras, e.g. cabin bag'], ['primary', 'Makes Select the main button']],
+      preview: function () { return C.flight({ airline: 'Skylark Air', code: 'SK 310', from: lhr, to: lis, dep: T.at(1, '07:15'), mins: 165, stops: 0, price: 109, primary: true, badges: [badge('success', 'Best overall')], facts: [fact('seat', 'Cabin bag included')] }); } },
+    { id: 'highlight', name: 'Highlight card', fn: 'highlight({...})', what: 'One standout answer with a label. Used in pairs for Cheapest and Earliest, always side by side and the same size.',
+      props: [['label, icon', 'e.g. Cheapest + tag'], ['to, from', 'Destination leads, big'], ['dep, mins, stops', 'Facts grid'], ['price', 'Shown large'], ['note', 'The catch, in one line']],
+      preview: function () { return '<div class="canvas" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">' + C.highlight({ label: 'Cheapest', icon: 'tag', airline: 'Skylark Air', from: ['LTN', 'London Luton'], to: ['KRK', 'Kraków'], dep: T.at(2, '06:10'), mins: 145, stops: 0, price: 19, note: 'Cabin bag costs extra.' }) + C.highlight({ label: 'Earliest', icon: 'zap', airline: 'Northline', from: lhr, to: ['AMS', 'Amsterdam'], dep: T.soon(130), mins: 75, stops: 0, price: 84, note: 'Leaves in ' + T.until(T.soon(130)) + '.' }) + '</div>'; }, raw: true },
+    { id: 'status', name: 'Status card', fn: 'status({...})', what: 'What\'s happening, in a title and one line, with a worded badge. Warning for disruption or no answer, error when nothing works.',
+      props: [['type', 'warning or error'], ['icon', 'wind, alert, help…'], ['badge', 'Worded status'], ['title, body', 'What and why']],
+      preview: function () { return C.status({ type: 'warning', icon: 'wind', badge: 'Disrupted', title: 'Edinburgh Airport (EDI): departures suspended', body: 'Gusts up to 70 mph. Departures are expected to restart around 22:00.' }); } },
+    { id: 'airport', name: 'Airport card', fn: 'airport()', what: 'The nearest airport that\'s still open, with a simple map, the drive time and directions.',
+      props: [['(demo data)', 'Edinburgh to Glasgow in the workshop example']], preview: function () { return C.airport(); } },
+    { id: 'booking', name: 'Booking card', fn: 'booking()', what: 'We can\'t see the traveller\'s booking, so we offer rebooking without making them answer first.',
+      props: [['(no props)', 'Asks for a 6-letter booking reference']], preview: function () { return C.booking(); } },
+    { id: 'list', name: 'List card', fn: 'list({...})', what: 'A titled list of options: hotels nearby, other ways to travel, or safety advice. Only used when no flight works.',
+      props: [['icon, kicker', 'e.g. bed + Stay nearby tonight'], ['title', 'What the list is'], ['items', '[name, detail, price?]'], ['action', 'Optional button']],
+      preview: function () { return C.list({ icon: 'bed', kicker: 'Stay nearby tonight', title: 'Places with rooms free', items: [['Haymarket Hotel', '0.4 mi walk · Free cancellation', '<span class="body strong">£89</span>'], ['Airport Lodge', '6 mi · Taxi about 25 min', '<span class="body strong">£74</span>']], action: 'See all places to stay' }); } },
+    { id: 'alert', name: 'Alert card', fn: 'alert(title, body)', what: 'One switch so the traveller doesn\'t have to keep checking.',
+      props: [['title', 'What we\'ll tell them'], ['body', 'When we\'ll tell them']], preview: function () { return C.alert('Tell me as soon as a flight opens up', 'We\'ll message you if Edinburgh reopens or the road to Glasgow clears.'); } },
+    { id: 'question', name: 'Question card', fn: 'question({...})', what: 'Exactly one clarifying question, with what we already know above it. Tap an answer or type one; each answer adds to the same request.',
+      props: [['known', 'What we already understood (optional)'], ['title', 'The one question'], ['note', 'An assumption to flag, e.g. the year (optional)'], ['options', '[label, request to run]']], preview: function () { return C.question({ title: 'Where are you flying from?', known: ['To Paris', '2–5 Feb 2027', '4 travellers'], note: 'I\'ve assumed you mean 2027, the next time those dates come round.', options: [['London', ''], ['Manchester', ''], ['Where I am now', '']] }); } },
+    { id: 'suggest', name: 'Suggestions card', fn: 'suggest({examples})', what: 'A few example requests the traveller can tap to run. Shows what PDG Flights can do.',
+      props: [['examples', 'Two to four full requests']], preview: function () { return C.suggest({ examples: ['Get me from Manchester to Rome next Tuesday', 'Find me the cheapest flight anywhere'] }); } }
+  ];
+  var CARD_BY_ID = {}; CARDS.forEach(function (c) { CARD_BY_ID[c.id] = c; });
+
+  /* ---------------- Ground rules ---------------- */
+  var GROUND = [
+    ['One result per request', 'Work out what kind of ask it is, then show one result. Never a mix of two.'],
+    ['Essentials first', 'A trip needs a from, a to and a when. Ask for what\'s missing before showing flights.'],
+    ['One question at a time', 'Show what we understood, offer tap answers, always accept typing.'],
+    ['Never drop a need silently', 'If no flight meets a need, keep the flights and say so.'],
+    ['Show only what was asked', 'Extras like hotels appear only when the main answer fails.'],
+    ['Be honest when we can\'t help', 'Say so plainly, then offer one way back.'],
+    ['The traveller can always change it', 'Your trip chips, Sort on every list, and Undo.'],
+    ['Every block earns its place', 'A block goes in only if it makes the card clearer or the decision quicker.']
+  ];
+  $('ground').innerHTML = GROUND.map(function (g) { return '<li><span class="body strong">' + g[0] + '</span><span class="caption">' + g[1] + '</span></li>'; }).join('');
+
+  /* ---------------- New cards (proposed) ---------------- */
+  var NEW_CARDS = [
+    { id: 'calendar', name: 'Price calendar', job: 'Prices across days or weeks. Tap a day to pick it.', blocks: 'Day price',
+      mock: function () { var d = [['Mo', 3, 92], ['Tu', 4, 61], ['We', 5, 58], ['Th', 6, 74], ['Fr', 7, 129], ['Sa', 8, 112], ['Su', 9, 88]];
+        return '<div class="mock"><p class="caption strong">London → Lisbon · March</p><div class="cal">' + d.map(function (x) { return '<span class="' + (x[2] < 65 ? 'lo' : '') + '">' + x[1] + '<i>£' + x[2] + '</i></span>'; }).join('') + '</div><p class="small muted">Cheapest days marked in green, with the word "Cheapest" on tap.</p></div>'; } },
+    { id: 'destination', name: 'Destination', job: 'A place idea: why it fits, from-price, tap to search it.', blocks: 'Price, Label',
+      mock: function () { return '<div class="mock"><div class="dest"><div><b>Tenerife</b>24°C in Dec<br>from £118</div><div><b>Malta</b>18°C in Dec<br>from £74</div><div><b>Seville</b>17°C in Dec<br>from £69</div></div><p class="small muted">Each tile says why it fits the request, in words.</p></div>'; } },
+    { id: 'compare', name: 'Compare', job: 'Two or three flights side by side, differences highlighted.', blocks: 'Route line, Price, Difference marker',
+      mock: function () { return '<div class="mock"><div class="cmp"><span></span><b>07:10</b><b>12:40</b><span class="lab">Price</span><span class="diff">£64</span><span>£109</span><span class="lab">Duration</span><span>2h 45m</span><span>2h 40m</span><span class="lab">Bag</span><span class="diff">Extra £25</span><span>Included</span><span class="lab">Lands</span><span>10:55</span><span>16:20</span></div><p class="small muted">Only rows that differ are bold. Same rows can fold away.</p></div>'; } }
+  ];
+  var NEW_BY_ID = {}; NEW_CARDS.forEach(function (c) { NEW_BY_ID[c.id] = c; });
+  function cardName(id) { return (CARD_BY_ID[id] || NEW_BY_ID[id]).name; }
+
+  /* ---------------- Scenarios ---------------- */
+  var GROUPS = [['A', 'Find a flight'], ['B', 'Explore'], ['C', 'Compare'], ['F', 'Disruption'], ['H', 'Not a flight search'], ['P', 'Parked']];
+  // r = recipe: [cardId, note, half?]. live = show the kit's real result.
+  var BASE = [['ai-note', 'Repeats the search back'], ['trip', 'What we understood, as chips'], ['group-label', 'Route, date, Sort'], ['flight', 'Flights, best first, cheapest tagged']];
+  var EMERG = [['ai-note', 'What\'s happening and what we did'], ['trip', 'What we understood'], ['status', 'Warning: what\'s disrupted'], ['airport', 'Nearest open airport', 1], ['booking', 'Rebook instead', 1], ['group-label', 'Soonest first, including the drive'], ['flight', 'Only flights they can reach in time']];
+  var UNK = [['status', 'We don\'t have an answer'], ['question', 'One clarifying question', 1], ['suggest', 'Example requests', 1]];
+  var SC = [
+    { id: 'A1', g: 'A', t: 'Simple search, one way', ex: 'Flights from London to Lisbon on Friday', s: 'built', res: 'Baseline', r: BASE, live: 1 },
+    { id: 'A2', g: 'A', t: 'Return trip', ex: 'Flights from London to Lisbon, 2 March to 9 March', s: 'built', res: 'Baseline', r: BASE.concat([['group-label', 'Return route and date'], ['flight', 'Return flights']]), live: 1 },
+    { id: 'A3', g: 'A', t: 'Missing detail', ex: 'Flights to Paris', s: 'built', res: 'One question', r: [['ai-note', 'Short lead-in'], ['question', 'So far, one question, tap answers']], live: 1 },
+    { id: 'A4', g: 'A', t: 'Family or group', ex: 'Travelling to Paris from London with 2 children, 1 elderly and 1 adult, 2 Feb 2027 to 5 Feb 2027', s: 'built', res: 'Baseline', r: BASE, note: 'Flights must fit everyone. Shows the group total.', live: 1 },
+    { id: 'A5', g: 'A', t: 'Hard constraint', ex: 'Flights from London to Rome tomorrow. I need to land by 10am and spend under £150', s: 'part', res: 'Baseline with needs', r: BASE, note: 'Deadline and budget work today. "Direct only" is not a need yet.', live: 1 },
+    { id: 'A6', g: 'A', t: 'Special assistance', ex: 'Flights from Manchester to Lisbon on Friday. I use a wheelchair and I am bringing my dog', s: 'part', res: 'Baseline with needs', r: BASE, note: 'Needs show as removable chips on Your trip and as facts on each flight.', live: 1 },
+    { id: 'A7', g: 'A', t: 'Flexible dates', ex: 'Cheapest week to fly from London to Lisbon in March', s: 'new', res: 'Flexible dates', r: [['ai-note', 'Says which week is cheapest'], ['trip', 'What we understood'], ['calendar', 'Prices across March'], ['group-label', 'Flights on the picked day'], ['flight', 'Flights']] },
+    { id: 'A8', g: 'A', t: 'Time of day', ex: 'Morning flights from London to Paris on Friday', s: 'new', res: 'Baseline with needs', r: BASE, note: 'New need: time of day. Same cards as Baseline.' },
+    { id: 'A9', g: 'A', t: 'Multi-city', ex: 'London to Rome on 3 March, then Rome to Athens on 7 March, then home on 10 March', s: 'new', res: 'Multi-city', r: [['ai-note', 'Repeats the route back'], ['trip', 'Each leg as a chip'], ['group-label', 'Leg 1: London → Rome'], ['flight', 'Flights'], ['group-label', 'Leg 2: Rome → Athens'], ['flight', 'Flights'], ['group-label', 'Leg 3: Athens → London'], ['flight', 'Flights']] },
+    { id: 'A10', g: 'A', t: 'Airline preference', ex: 'Only British Airways from London to Rome on Friday', s: 'new', res: 'Baseline with needs', r: BASE, note: 'New need: airline. Same cards as Baseline.' },
+    { id: 'B1', g: 'B', t: 'Anywhere', ex: K.EXAMPLES.spontaneous, s: 'built', res: 'Spontaneous', r: [['ai-note', 'Found one of each'], ['trip', 'What we understood'], ['highlight', 'Cheapest', 1], ['highlight', 'Earliest', 1], ['group-label', 'More places to go'], ['flight', 'More ideas, cheapest first']], live: 1 },
+    { id: 'B2', g: 'B', t: 'Themed', ex: 'Somewhere warm in December under £200 from London', s: 'new', res: 'Explore', r: [['ai-note', 'Says what "warm" meant'], ['trip', 'What we understood, budget as a need'], ['destination', '3 to 6 places that fit']] },
+    { id: 'B3', g: 'B', t: 'Weekend away', ex: 'A weekend away from Manchester, back Sunday night', s: 'new', res: 'Weekend away', r: [['ai-note', 'Says which weekend'], ['trip', 'What we understood'], ['destination', '3 places with a Friday out and Sunday back'], ['calendar', 'Other weekends']] },
+    { id: 'B4', g: 'B', t: 'Watch a price', ex: 'Tell me when London to Lisbon drops under £80', s: 'new', res: 'Price watch', r: [['ai-note', 'Today\'s best price, and what we\'ll watch'], ['trip', 'What we understood'], ['alert', 'Tell me when it drops under £80'], ['flight', 'Today\'s best price']] },
+    { id: 'C1', g: 'C', t: 'Compare two', ex: 'Is the 07:10 or the 12:40 to Lisbon better?', s: 'new', res: 'Compare', r: [['ai-note', 'Which one, for what reason'], ['compare', 'The two flights side by side']] },
+    { id: 'C2', g: 'C', t: 'Why this price', ex: 'Why is Friday so much more expensive to Lisbon?', s: 'new', res: 'Why this price', r: [['ai-note', 'The reason, in one sentence'], ['calendar', 'Prices around Friday, cheaper days marked']] },
+    { id: 'F1', g: 'F', t: 'Stuck, a flight can be reached', ex: K.EXAMPLES.emergency, s: 'built', res: 'Emergency', r: EMERG, live: 1 },
+    { id: 'F2', g: 'F', t: 'Stuck, nothing can be reached', ex: K.EXAMPLES['emergency-none'], s: 'built', res: 'Emergency, no flights', r: [['ai-note', 'No flight tonight'], ['trip', 'What we understood'], ['status', 'Error: why'], ['list', 'Other ways to travel'], ['list', 'Hotels nearby', 1], ['list', 'Stay safe', 1], ['alert', 'Tell me when a flight opens up']], live: 1 },
+    { id: 'F3', g: 'F', t: 'Stuck, but price matters', ex: 'I\'m stranded in Edinburgh, my flight was cancelled. Cheapest flight to London tonight.', s: 'built', res: 'Emergency', r: EMERG, note: 'Rule B: emergency wins, the cheapest flight they can make gets a badge.', live: 1 },
+    { id: 'F4', g: 'F', t: 'My flight was cancelled', ex: 'My flight from Edinburgh to London got cancelled, I need the next available flight', s: 'part', res: 'Emergency', r: EMERG, note: 'The Booking card offers rebooking. We can\'t see their booking yet.', live: 1 },
+    { id: 'F5', g: 'F', t: 'Missed connection', ex: 'I\'m going to miss my connection in Amsterdam, I need to get to London', s: 'new', res: 'Emergency', r: [['ai-note', 'What\'s happening and what we did'], ['trip', 'From the connecting airport'], ['status', 'Warning: the late flight'], ['booking', 'Rebook instead', 1], ['group-label', 'Next flights from Amsterdam'], ['flight', 'Flights they can still make']], note: 'Same as Emergency, from the connecting airport. No Airport card.' },
+    { id: 'H1', g: 'H', t: 'Off topic', ex: 'What should I pack for a wedding?', s: 'built', res: 'Unknown', r: UNK, live: 1 },
+    { id: 'H2', g: 'H', t: 'Nearby topic', ex: 'Find me a hotel in Lisbon', s: 'part', res: 'Unknown', r: UNK, note: 'Should get Unknown. Today the kit sees "Lisbon" and asks where they\'re flying from.' },
+    { id: 'H3', g: 'H', t: 'Out of scope', ex: 'Cancel my booking', s: 'new', res: 'Unknown', r: UNK, note: 'The Status card should name what we can\'t do here, then offer what we can.' },
+    { id: 'P1', g: 'P', t: 'Book', ex: 'Fare and bags, seats, traveller details, payment', s: 'parked' },
+    { id: 'P2', g: 'P', t: 'Manage a booking', ex: 'Find my trip, change, cancel, refund, add extras, fix a name', s: 'parked' },
+    { id: 'P3', g: 'P', t: 'Day of travel', ex: 'Flight status, check-in, boarding pass, bag rules', s: 'parked' },
+    { id: 'P4', g: 'P', t: 'Compensation and fare details', ex: '"Am I owed anything?", "does this include a bag?"', s: 'parked' }
+  ];
+  var ST = { built: ['st--built', 'Built'], part: ['st--part', 'Partly built'], new: ['st--new', 'Proposed'], parked: ['st--new', 'Parked'] };
+
+  var group = 'all', current = null;
+  $('sc-tabs').innerHTML = [['all', 'All in scope']].concat(GROUPS).map(function (g) {
+    var n = SC.filter(function (s) { return g[0] === 'all' ? s.g !== 'P' : s.g === g[0]; }).length;
+    return '<button class="tab" role="tab" type="button" data-g="' + g[0] + '">' + g[1] + ' <span class="muted">' + n + '</span></button>';
+  }).join('');
+  function drawTiles() {
+    Array.prototype.forEach.call($('sc-tabs').children, function (b) { b.setAttribute('aria-selected', b.dataset.g === group ? 'true' : 'false'); });
+    $('sc-tiles').innerHTML = SC.filter(function (s) { return group === 'all' ? s.g !== 'P' : s.g === group; }).map(function (s) {
+      return '<button type="button" class="tile' + (s.s === 'new' || s.s === 'parked' ? ' tile--new' : '') + '" data-sc="' + s.id + '" aria-pressed="' + (current === s.id) + '">' +
+        '<span class="tile__top"><span class="tile__id">' + s.id + '</span><span class="st ' + ST[s.s][0] + ' small">' + ST[s.s][1] + '</span></span>' +
+        '<span class="body strong">' + s.t + '</span><span class="caption tile__ex">' + (s.g === 'P' ? esc(s.ex) : '“' + esc(s.ex) + '”') + '</span></button>';
+    }).join('');
+  }
+  function sketch(r) {
+    return '<div class="sketch">' + r.map(function (x) {
+      var nw = !!NEW_BY_ID[x[0]];
+      return '<div class="sk' + (x[2] ? ' half' : '') + (nw ? ' sk--new' : '') + '"><span class="sk__name caption">' + cardName(x[0]) + (nw ? ' <span class="st st--new small">To build</span>' : '') + '</span><span class="sk__note small">' + x[1] + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function showScenario(id, scroll) {
+    var s = SC.filter(function (x) { return x.id === id; })[0];
+    current = id; drawTiles();
+    if (s.g === 'P') {
+      $('sc-panel').innerHTML = '<div class="callout"><p class="small muted">' + s.id + ' · Parked</p><p class="h4">' + s.t + '</p><p class="body" style="margin-top:4px">' + esc(s.ex) + '. Out of scope for now. If a traveller asks, they get the Unknown result, which says plainly what we can\'t do here and offers what we can.</p></div>';
+    } else {
+      var right;
+      if (s.live) {
+        var out = K.render(s.ex);
+        right = '<div class="stage"><div class="stage__label small"><span>What the traveller sees, live from the kit</span><span class="case-tag small">Result: ' + K.LABELS[out.key] + '</span></div><div class="canvas">' + out.html.join('') + '</div></div>';
+      } else {
+        var now = K.render(s.ex);
+        right = '<div class="stage"><div class="stage__label small"><span>Sketch: the cards, in order</span><span class="case-tag small">Result: ' + s.res + '</span></div>' + sketch(s.r) +
+          '<p class="caption today" style="margin-top: var(--space-4)"><strong>Today</strong> the kit answers this with <strong>' + K.LABELS[now.key] + '</strong>. ' + now.decision.reason + '</p></div>';
+      }
+      $('sc-panel').innerHTML = '<div class="pattern">' +
+        '<div class="pattern__spec">' +
+          '<div><p class="small muted">' + s.id + ' · ' + GROUPS.filter(function (g) { return g[0] === s.g; })[0][1] + '</p><h3 class="h3">' + s.t + '</h3></div>' +
+          '<div><span class="st ' + ST[s.s][0] + ' small">' + ST[s.s][1] + '</span></div>' +
+          '<div class="ask"><p class="small muted">Example request</p><p class="body">“' + esc(s.ex) + '”</p></div>' +
+          (s.note ? '<p class="body">' + s.note + '</p>' : '') +
+          '<div><p class="caption muted" style="margin-bottom: var(--space-2)">Result: <strong>' + s.res + '</strong>, built from</p><ol class="recipe body">' +
+            s.r.map(function (x) { return '<li><span><a href="#card-' + x[0] + '">' + cardName(x[0]) + '</a>' + (NEW_BY_ID[x[0]] ? ' <span class="st st--new small" style="display:inline-flex">To build</span>' : '') + '<span class="small">' + x[1] + '</span></span></li>'; }).join('') +
+          '</ol></div>' +
+          '<button class="pdg-btn pdg-btn--secondary body" type="button" data-try="' + esc(s.ex) + '">Try it in the test box</button>' +
+        '</div>' + right + '</div>';
+    }
+    if (scroll) $('sc-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  $('sc-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-g]'); if (b) { group = b.dataset.g; drawTiles(); } });
+  $('sc-tiles').addEventListener('click', function (e) { var b = e.target.closest('[data-sc]'); if (b) showScenario(b.dataset.sc, true); });
+  $('sc-panel').addEventListener('click', function (e) { var b = e.target.closest('[data-run]'); if (b && b.dataset.run) { pgRun(b.dataset.run); $('test').scrollIntoView({ behavior: 'smooth' }); } });
+
+  /* ---------------- Cards ---------------- */
+  function usedBy(id) { return SC.filter(function (s) { return s.r && s.r.some(function (x) { return x[0] === id; }); }).map(function (s) { return s.id; }); }
+  function ids(id) { var u = usedBy(id); return '<div><p class="small muted" style="margin-bottom:4px">Answers</p><div class="ids">' + u.map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div></div>'; }
+  $('cards-built').innerHTML = CARDS.map(function (c) {
+    return '<article class="ctile" id="card-' + c.id + '"><div class="spread"><h4 class="h4">' + c.name.replace(/ card$/, '') + '</h4><span class="st st--built small">Built</span></div>' +
+      '<p class="caption muted">' + c.what + '</p>' + ids(c.id) +
+      '<details><summary>Preview and rules</summary><div class="spec__preview">' + (c.raw ? c.preview() : '<div class="canvas">' + c.preview() + '</div>') + '</div>' +
+      (CARD_RULES[c.id] ? '<dl class="spec__rules caption">' + ['The AI can decide', 'Show when', 'Don\'t show when', 'The traveller can always'].map(function (h, i) { return '<div><dt>' + h + '</dt><dd>' + esc(CARD_RULES[c.id][i]) + '</dd></div>'; }).join('') + '</dl>' : '') +
+      '</details></article>';
+  }).join('');
+  $('cards-new').innerHTML = NEW_CARDS.map(function (c) {
+    return '<article class="ctile ctile--new" id="card-' + c.id + '"><div class="spread"><h4 class="h4">' + c.name + '</h4><span class="st st--new small">To build</span></div>' +
+      '<p class="caption muted">' + c.job + '</p>' + c.mock() + '<p class="small muted">Blocks: ' + c.blocks + '</p>' + ids(c.id) + '</article>';
+  }).join('');
+
+  /* ---------------- Blocks ---------------- */
+  var BLOCKS = [
+    ['Route line', 'Departs → arrives, duration, stops', 'Flight, Highlight, Compare', 1],
+    ['Price', 'Per person, plus the total for a group', 'Flight, Highlight, Destination, Compare', 1],
+    ['Label', 'Why this one stands out: "Cheapest", "Next you can make"', 'Flight, Highlight', 1],
+    ['Fact row', 'Up to two facts that matter for this request', 'Flight, Airport', 1],
+    ['Known chips', 'What we already understood ("So far")', 'Question, Your trip', 1],
+    ['Tap answers', '2 to 4 answers as pills', 'Question', 1],
+    ['Mini map', 'Where you are and where to go', 'Airport', 1],
+    ['Option row', 'One option with its key detail and price', 'List', 1],
+    ['Difference marker', 'Highlights where two options differ', 'Compare', 0],
+    ['Day price', 'One day with its lowest price, cheapest days marked', 'Price calendar', 0]
+  ];
+  $('blocks').innerHTML = '<thead><tr><th>Block</th><th>What it shows</th><th>Used in</th><th>Status</th></tr></thead><tbody>' +
+    BLOCKS.map(function (b) { return '<tr><th>' + b[0] + '</th><td>' + b[1] + '</td><td>' + b[2] + '</td><td>' + (b[3] ? '<span class="st st--built small">Built</span>' : '<span class="st st--new small">To build</span>') + '</td></tr>'; }).join('') + '</tbody>';
+
+  /* ---------------- Test ---------------- */
+  var KEY_SC = { baseline: ['A1', 'A2', 'A4', 'A5', 'A6'], ask: ['A3'], spontaneous: ['B1'], emergency: ['F1', 'F3', 'F4'], 'emergency-none': ['F2'], unknown: ['H1', 'H3'] };
+  var pgInput = $('pg-input');
+  var EXS = [['Baseline', K.EXAMPLES.baseline], ['Family, no origin', K.EXAMPLES.ask], ['Land by 10am', SC[4].ex], ['Anywhere', K.EXAMPLES.spontaneous], ['Emergency', K.EXAMPLES.emergency], ['No flight works', K.EXAMPLES['emergency-none']], ['Off topic', 'What should I pack for a wedding?']];
+  $('pg-examples').innerHTML = EXS.map(function (x) { return '<button class="pill caption" type="button" data-pg="' + esc(x[1]) + '">' + x[0] + '</button>'; }).join('');
+  $('pg-examples').addEventListener('click', function (e) { var b = e.target.closest('[data-pg]'); if (b) pgRun(b.dataset.pg); });
+  function pgRun(text) {
+    pgInput.value = text;
+    var out = K.render(text), d = out.decision;
+    var m = KEY_SC[out.key] || [];
+    $('pg-verdict').innerHTML = '<div class="verdict"><span class="small">Result</span><span class="h4">' + K.LABELS[out.key] + '</span><span class="caption">' + d.reason + '</span>' +
+      (m.length ? '<span class="small" style="margin-top:4px">Answers scenarios</span><div class="match">' + m.map(function (x) { return '<a href="#scenarios" data-show="' + x + '">' + x + '</a>'; }).join('') + '</div>' : '') + '</div>';
+    var s = d.slots;
+    function slot(label, v) { return '<div><dt class="small">' + label + '</dt><dd class="' + (v ? '' : 'none') + '">' + (v || '—') + '</dd></div>'; }
+    function cap(v) { return v ? v.charAt(0).toUpperCase() + v.slice(1) : v; }
+    $('pg-slots').innerHTML = slot('From', s.from === 'here' ? 'Your location' : cap(s.from)) + slot('To', cap(s.to)) + slot('When', s.date ? s.date + (s.dates && s.dates.assumedYear ? ' (year assumed)' : '') : null) + slot('Travellers', s.pax ? s.pax.total + ': ' + s.pax.label : '1 adult (default)');
+    $('pg-trace').innerHTML = d.checks.map(function (c) {
+      var win = c.id === 'essentials' ? !d.missing : d.rule.id === c.id;
+      var ask = c.id === 'essentials' && d.missing;
+      var cls = win ? 'is-win' : ask ? 'is-ask' : c.skipped ? 'is-skip' : 'is-fail';
+      var mark = win ? '✓' : ask ? '?' : c.skipped ? '·' : '✕';
+      return '<li class="' + cls + '"><span class="trace__mark" aria-hidden="true">' + mark + '</span><div><span class="strong">' + (typeof c.order === 'number' ? c.order + '. ' : 'Then: ') + c.name + '</span>' +
+        (c.matched.length ? ' <span class="muted">· ' + c.matched.join(', ') + '</span>' : '') + '<br><span class="muted">' + c.note + '</span></div></li>';
+    }).join('');
+    $('pg-tag').innerHTML = '<span class="case-tag small">Result: ' + K.LABELS[out.key] + '</span>';
+    var canvas = $('pg-canvas');
+    canvas.innerHTML = out.html.join('');
+    Array.prototype.forEach.call(canvas.children, function (el, i) { el.classList.add('card-in'); el.style.animationDelay = (i * 60) + 'ms'; });
+  }
+  $('pg-form').addEventListener('submit', function (e) { e.preventDefault(); if (pgInput.value.trim()) pgRun(pgInput.value.trim()); });
+  pgInput.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('pg-form').requestSubmit(); } });
+  $('pg-canvas').addEventListener('click', function (e) { var b = e.target.closest('[data-run]'); if (b && b.dataset.run) pgRun(b.dataset.run); });
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-try]');
+    if (t) { pgRun(t.dataset.try); $('test').scrollIntoView({ behavior: 'smooth' }); }
+    var sh = e.target.closest('[data-show]');
+    if (sh) { e.preventDefault(); group = 'all'; showScenario(sh.dataset.show, true); }
+  });
+
+  drawTiles();
+  showScenario('F1');
+  pgRun(K.EXAMPLES.baseline);
+
+  /* ---------------- Nav highlight ---------------- */
+  var links = document.querySelectorAll('.nav a');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) links.forEach(function (a) { a.classList.toggle('is-on', a.getAttribute('href') === '#' + en.target.id); }); });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    document.querySelectorAll('main .section').forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
