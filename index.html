@@ -216,6 +216,10 @@ h1, h2, h3, p { margin: 0; }
 .pill { display: inline-flex; align-items: center; min-height: 36px; padding: var(--space-1) var(--space-3); border: var(--border-width) solid var(--border); border-radius: var(--radius-full); background: var(--surface); color: var(--text); font-weight: 600; cursor: pointer; text-align: left; }
 .pill:hover { border-color: var(--text-muted); }
 .pill.is-on { background: var(--text); color: var(--surface); border-color: var(--text); }
+.pill svg { width: 14px; height: 14px; flex: none; margin-right: 6px; }
+.pill-date { position: relative; display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.pill-date__input { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }
+.pill-date__input.is-shown { position: static; width: auto; height: 36px; opacity: 1; pointer-events: auto; padding: 0 var(--space-2); border: var(--border-width) solid var(--border); border-radius: var(--radius-full); background: var(--surface); color: var(--text); font: inherit; }
 .suggest { display: flex; flex-direction: column; gap: var(--space-2); }
 .suggest button { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); width: 100%; padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--border); border-radius: var(--radius-2); background: var(--background); color: var(--text); cursor: pointer; text-align: left; }
 .suggest button:hover { border-color: var(--text-muted); }
@@ -608,6 +612,7 @@ main { flex: 1; }
     zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
     arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
     pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/>'
   };
   function ic(name, cls) {
@@ -938,15 +943,25 @@ main { flex: 1; }
       c.badges = [badge('success', 'Cheapest you can make')].concat((c.badges || []).filter(function (b) { return b.indexOf('Next you can make') === -1 && b.indexOf('neutral') === -1; }));
       extra = ' The cheapest one you can make is ' + c.code + ' at £' + c.price + '. Use Sort to put it first.';
     }
+    var cz = causeOf(t);
     return [
-      aiNote(n.home[1] + ' has stopped departures because of the weather. ' + n.alt[1] + ' is still flying, so here are the next flights' + toTxt + ' you can reach in time.' + extra),
+      aiNote(n.home[1] + ' has stopped departures because of ' + cz.why + '. ' + n.alt[1] + ' is still flying, so here are the next flights' + toTxt + ' you can reach in time.' + extra),
       trip(sl),
-      statusCard({ type: 'warning', icon: 'wind', badge: 'Disrupted', title: n.home[1] + ' (' + n.home[0] + '): departures suspended', body: 'Gusts up to 70 mph. Departures are expected to restart around 22:00, but this may change.' }),
+      statusCard({ type: 'warning', icon: cz.icon, badge: 'Disrupted', title: n.home[1] + ' (' + n.home[0] + '): departures suspended', body: cz.body }),
       airportCard({ you: you, code: n.alt[0], name: n.alt[1], miles: n.miles, drive: n.drive, road: n.road, roadNote: n.roadNote }),
       bookingCard(),
       groupLabel('Next flights from ' + n.alt[1] + toTxt, 'Soonest first, including the drive', 'best')
     ].concat(flights.map(function (x) { return flightCard(x); }));
   };
+
+  // What's causing the disruption, from the traveller's own words. Weather is the default.
+  function causeOf(t) {
+    if (/\b(power cut|power failure|outage|blackout)\b/.test(t)) return { why: 'a power cut', icon: 'zap', body: 'The terminal is running on backup power. Departures are expected to restart around 22:00, but this may change.' };
+    if (/\b(fire|evacuat\w*)\b/.test(t)) return { why: 'an evacuation', icon: 'alert', body: 'The terminal has been evacuated. Departures are expected to restart around 22:00, but this may change.' };
+    if (/\bstrike\b/.test(t)) return { why: 'a strike', icon: 'alert', body: 'Staff are on strike today. Departures are expected to restart tomorrow morning, but this may change.' };
+    if (/\b(fog|snow)\b/.test(t)) return { why: 'the weather', icon: 'wind', body: 'Low visibility on the runway. Departures are expected to restart around 22:00, but this may change.' };
+    return { why: 'the weather', icon: 'wind', body: 'Gusts up to 70 mph. Departures are expected to restart around 22:00, but this may change.' };
+  }
 
   // 2b. EMERGENCY, NO FLIGHT WORKS: only now try other transport, a hotel nearby and safety.
   CASES['emergency-none'] = function (t, ctx) {
@@ -1019,7 +1034,30 @@ main { flex: 1; }
       (q.known && q.known.length ? '<div class="row known small"><span class="muted">So far</span>' + q.known.map(function (k) { return k.slot ? '<button type="button" class="known__chip" data-edit="' + k.slot + '" aria-label="Change ' + esc(k.text) + '">' + esc(k.text) + '</button>' : '<span class="known__chip">' + esc(k.text || k) + '</span>'; }).join('') + '</div>' : '') +
       '<h3 class="h4 pdg-card__title">' + q.title + '</h3>' +
       (q.note ? '<p class="caption muted">' + q.note + '</p>' : '') +
-      '<div class="pill-row">' + q.options.map(function (a) { return '<button class="pill caption" type="button" data-say="' + esc(a[0]) + '" data-run="' + esc(a[1]) + '">' + esc(a[0]) + '</button>'; }).join('') + '</div></article>';
+      '<div class="pill-row">' + q.options.map(function (a) { return '<button class="pill caption" type="button" data-say="' + esc(a[0]) + '" data-run="' + esc(a[1]) + '">' + esc(a[0]) + '</button>'; }).join('') +
+      (q.pickDate != null ? '<span class="pill-date"><button class="pill caption" type="button" data-pick-date="' + esc(q.pickDate) + '">' + ic('calendar') + 'Pick a date</button><input type="date" class="pill-date__input" min="' + isoDay(TODAY0) + '" aria-label="Pick a date" tabindex="-1"></span>' : '') +
+      '</div></article>';
+  }
+  function isoDay(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  // "Pick a date": open the browser's date picker, then answer like a tapped pill (data-say for chats, data-run for one-shot pages).
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-pick-date]');
+      if (!b || b.hasAttribute('data-run') || b.closest('.is-old')) return;
+      var inp = b.parentNode.querySelector('.pill-date__input');
+      try { inp.showPicker(); } catch (err) { inp.classList.add('is-shown'); inp.focus(); }
+    });
+    document.addEventListener('change', function (e) {
+      var inp = e.target;
+      if (!inp.classList || !inp.classList.contains('pill-date__input') || !inp.value) return;
+      var b = inp.parentNode.querySelector('[data-pick-date]'), v = inp.value.split('-');
+      var d = mkDate(+v[2], +v[1] - 1, +v[0]);
+      var say = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      b.setAttribute('data-say', say);
+      b.setAttribute('data-run', (b.getAttribute('data-pick-date') + ' on ' + say).trim());
+      b.textContent = say;
+      b.click();
+    });
   }
 
   // SUGGESTIONS CARD: example requests the traveller can tap to run.
@@ -1055,9 +1093,9 @@ main { flex: 1; }
       other: ['Who\'s travelling?', ['Just me', '2 adults', '2 adults and 2 children', '4 adults']]
     },
     date: {
-      emergency: ['When do you need to leave?', ['As soon as possible', 'Tomorrow']],
-      spontaneous: ['When can you go?', ['As soon as possible', 'This weekend', 'Any time']],
-      other: ['When would you like to fly?', ['Today', 'Tomorrow', 'This weekend', 'Next Friday']]
+      emergency: ['Date', ['As soon as possible', 'Tomorrow']],
+      spontaneous: ['Date', ['As soon as possible', 'This weekend', 'Any time']],
+      other: ['Date', ['Today', 'Tomorrow', 'This weekend', 'Next Friday']]
     }
   };
   function answerPhrase(missing, label) {
@@ -1079,20 +1117,22 @@ main { flex: 1; }
       spontaneous: 'Love it. One quick question and I\'ll find you the cheapest and the earliest.',
       baseline: 'Happy to help. I just need one more detail.'
     }[intent];
+    if (missing === 'date') lead = intent === 'emergency' ? 'I\'m sorry you\'re stuck. I just need the date.' : 'Got it. I just need the date.';
     if (ctx.editing) lead = 'Sure. What should I change it to?';
     if (ctx.retry) lead = 'Sorry, I didn\'t catch that. Could you try again? You can tap an answer too.';
     var note = missing !== 'date' && sl.dates && sl.dates.assumedYear ? 'I\'ve assumed you mean ' + sl.dates.start.getFullYear() + ', the next time those dates come round. If not, tell me the year.' : '';
     return [
       aiNote(lead),
-      questionCard({ title: ctx.editing ? q[0].replace(/\?$/, ' instead?') : q[0], known: knownList(sl), note: note, options: q[1].map(function (l) { return [l, raw + ' ' + answerPhrase(missing, l)]; }) })
+      questionCard({ title: ctx.editing ? (missing === 'date' ? 'New date' : q[0].replace(/\?$/, ' instead?')) : q[0], known: knownList(sl), note: note, options: q[1].map(function (l) { return [l, raw + ' ' + answerPhrase(missing, l)]; }), pickDate: missing === 'date' ? raw : null })
     ];
   };
 
   // 4. UNKNOWN: not a trip at all. Say so, ask ONE question, offer example requests.
-  CASES.unknown = function () {
+  CASES.unknown = function (t, ctx) {
     var examples = ['Get me from Manchester to Rome next Tuesday', EX.spontaneous, EX.emergency];
+    var off = ctx && ctx.offTopic;
     return [
-      statusCard({ type: 'warning', icon: 'help', badge: 'No answer', title: 'I don\'t have an answer for that', body: 'PDG Flights can find, compare and change flights. I couldn\'t find a trip in your request, so I don\'t want to guess.' }),
+      statusCard({ type: 'warning', icon: 'help', badge: 'No answer', title: 'I don\'t have an answer for that', body: off ? 'PDG Flights can find, compare and change flights. I can\'t help with ' + esc(off) + ', so I don\'t want to guess.' : 'PDG Flights can find, compare and change flights. I couldn\'t find a trip in your request, so I don\'t want to guess.' }),
       questionCard({ half: true, title: 'Where would you like to fly to?', options: [['Lisbon', 'to lisbon'], ['Paris', 'to paris'], ['Anywhere cheap', 'anywhere, the cheapest and earliest'], ['I\'m stuck and need to leave', 'I\'m stuck and need the next available flight']] }),
       suggestCard({ examples: examples })
     ];
@@ -1154,19 +1194,26 @@ main { flex: 1; }
       return { start: sd, end: null, assumedYear: !m[2] && sd.getFullYear() !== NOW.getFullYear(), label: sd.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) };
     }
     // Relative words
-    var day = null, wd = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'], word = null;
-    wd.forEach(function (w, i) { if (new RegExp('\\b' + w + '\\b').test(t)) { day = (i - NOW.getDay() + 7) % 7 || 7; word = w; } });
+    // Full or short day names: "friday", "fri", "thurs". A bare "sun" only counts next to a time of day or "on/this/next".
+    var day = null, word = null, PART = '(?:night|evening|morning|afternoon|eve)';
+    var wd = [['sunday', '(?:sunday|(?:(?:on|this|next|until|till)\\s+)sun\\b|sun(?=\\s+' + PART + '))'], ['monday', 'mon(?:day)?'], ['tuesday', 'tue(?:s(?:day)?)?'],
+      ['wednesday', 'wed(?:s|nesday)?'], ['thursday', 'thu(?:r(?:s(?:day)?)?)?'], ['friday', 'fri(?:day)?'], ['saturday', 'sat(?:urday)?']];
+    wd.forEach(function (w, i) { if (new RegExp('\\b' + w[1] + '\\b').test(t)) { day = (i - NOW.getDay() + 7) % 7 || 7; word = w[0]; } });
     if (/\b(this )?weekend\b/.test(t)) { day = (6 - NOW.getDay() + 7) % 7 || 7; word = 'this weekend'; }
     if (/\bnext week\b/.test(t)) { day = 7; word = 'next week'; }
     if (/\btomorrow\b/.test(t)) { day = 1; word = 'tomorrow'; }
     if (/\b(today|tonight)\b/.test(t)) { day = 0; word = 'today'; }
     if (day === null) {
-      if (/\b(asap|as soon as possible|earliest|soonest|next available|right now|quickly)\b/.test(t)) return { start: new Date(TODAY0), end: null, flexible: true, assumedYear: false, label: 'As soon as possible' };
+      if (/\b(asap|as soon as possible|earliest|soonest|next available|right now|quickly|fastest|quickest|immediately)\b/.test(t)) return { start: new Date(TODAY0), end: null, flexible: true, assumedYear: false, label: 'As soon as possible' };
       if (/\b(any ?time|whenever|flexible|any day|any date)\b/.test(t)) { var a = new Date(TODAY0); a.setDate(a.getDate() + 1); return { start: a, end: null, flexible: true, assumedYear: false, label: 'Any time' }; }
       return null;
     }
     var st = new Date(TODAY0); st.setDate(st.getDate() + day);
-    return { start: st, end: null, assumedYear: false, label: word.charAt(0).toUpperCase() + word.slice(1) };
+    // Part of the day: "fri night", "tomorrow morning", "tonight"
+    var pm = new RegExp('\\b' + PART + '\\b').exec(t), part = /\btonight\b/.test(t) && day === 0 ? 'night' : (pm ? (pm[0] === 'eve' ? 'evening' : pm[0]) : null);
+    if (/\btonight\b/.test(t) && day === 0) word = 'tonight';
+    var label = word.charAt(0).toUpperCase() + word.slice(1) + (part && word !== 'tonight' && !/week/.test(word) ? ' ' + part : '');
+    return { start: st, end: null, part: part, assumedYear: false, label: label };
   }
 
   // Reads travellers like "2 children 1 elderly, 1 adult".
@@ -1225,7 +1272,10 @@ main { flex: 1; }
     return Object.keys(nd).length ? nd : null;
   }
   var TRAVEL_RE = /\b(fly|flying|flight|flights|trip|travel|travelling|traveling|go to|get me|book|ticket|holiday|visit)\b/;
-  var URGENT_RE = /\b(emergency|urgent|asap|as soon as possible|quickly|right now|next available)\b/;
+  var URGENT_RE = /\b(emergency|urgent|asap|as soon as possible|quickly|right now|next available|fastest|quickest|immediately|get me out)\b/;
+  // Things we don't do. Without a flight word, these go to Unknown instead of asking for an origin.
+  var OFFTOPIC_RE = /\b(hotels?|hostels?|airbnb|accommodation|somewhere to stay|place to stay|car hire|hire a car|rent a car|rental car|restaurants?|trains?|buses|coach|ferry|ferries|visas?|weather)\b/;
+  var FLIGHTWORD_RE = /\b(fly|flying|flights?|plane|airport|airline|ticket|tickets)\b/;
 
   var ESSENTIALS = {
     title: 'Every request needs a from, a to and a when',
@@ -1245,7 +1295,7 @@ main { flex: 1; }
       job: 'Get a stuck traveller moving as fast and as safely as possible.',
       when: 'The request mentions a disruption or urgency. This wins over everything else, even if a destination or a price is mentioned.',
       signals: [
-        { label: 'Disruption', re: /\b(storm|windstorm|wind|snow|flood|stuck|stranded|cancell?ed|delayed|diverted|strike|missed)\b/ },
+        { label: 'Disruption', re: /\b(storm|windstorm|wind|snow|flood|stuck|stranded|cancell?ed|delayed|diverted|strike|missed|outage|power cut|power failure|blackout|evacuat\w*|fire|fog|ash cloud|grounded|disrupt\w*|(?:airport|terminal|runway)s? (?:is |are )?(?:closed|shut))\b/ },
         { label: 'Urgency', re: URGENT_RE }
       ],
       needs: 'Where they are now, where they need to get to (or anywhere), and when. Urgency words count as when.',
@@ -1305,7 +1355,7 @@ main { flex: 1; }
     {
       id: 'unknown', order: 4, name: 'Unknown',
       job: 'Be honest when we can\'t answer, and get the traveller back on track in one step.',
-      when: 'No other rule holds: there\'s no trip in the request at all.',
+      when: 'No other rule holds: there\'s no trip in the request at all, or it asks for something we don\'t do, like a hotel or a train, without mentioning flights.',
       signals: [],
       needs: 'Nothing. This is the fallback.',
       do: [
@@ -1319,6 +1369,8 @@ main { flex: 1; }
 
   function slotsOf(t) {
     var from = findCity(t, 'from') || findCity(t, 'leaving') || findCity(t, 'out of') || findCity(t, 'stuck in') || findCity(t, 'stranded in') || findCity(t, 'i\'m in') || findCity(t, 'i am in');
+    // "in London airport", "at Paris airport": that's where they are, whatever the request
+    if (!from) from = Object.keys(CITIES).filter(function (k) { return new RegExp('\\b(?:in|at)\\s+(?:the\\s+)?' + k + '\\s+(?:\\w+\\s+)?airport\\b').test(t); })[0] || null;
     if (!from && RULES[0].signals[0].re.test(t)) from = findCity(t, 'in') || findCity(t, 'at');
     // "London to Rome": the city right before "to" is where they're flying from
     if (!from) from = Object.keys(CITIES).filter(function (k) { return new RegExp('\\b' + k + '\\s+(?:to|→|-)\\s+[a-z]').test(t); })[0] || null;
@@ -1390,12 +1442,14 @@ main { flex: 1; }
     var slots = applyOv(slotsOf(t), ov);
     var checks = [];
     var winner = null;
+    var off = OFFTOPIC_RE.exec(t), offTopic = off && !FLIGHTWORD_RE.test(t) ? off[0] : null;
 
     RULES.forEach(function (r) {
       var matched = [];
       r.signals.forEach(function (s) { if (s.slot ? slots[s.slot] && slots[s.slot] !== 'anywhere' : s.re.test(t)) matched.push(s.label); });
       var passed, note;
       if (r.id === 'unknown') { passed = true; note = 'Fallback when nothing else holds.'; }
+      else if (offTopic && r.id !== 'emergency') { passed = false; note = 'Asks about ' + offTopic + ', not flights.'; }
       else if (r.anyOf) { passed = matched.length > 0; note = passed ? 'Found ' + matched.join(', ').toLowerCase() + '.' : 'No ' + (r.id === 'emergency' ? 'disruption or urgency.' : 'trip details.'); }
       else {
         var lacking = r.requires.filter(function (x) { return matched.indexOf(x) === -1; });
@@ -1427,8 +1481,8 @@ main { flex: 1; }
     }
     else if (key === 'spontaneous') reason = 'No fixed destination, so we show the cheapest and the earliest flight side by side.';
     else if (key === 'baseline') reason = 'We know where from, where to and when, so a simple list of flights answers it.';
-    else reason = 'There\'s no trip in this request. We say so, ask where they\'d like to go and offer examples.';
-    return { key: key, intent: intent, rule: winner, slots: slots, missing: missing, checks: checks, reason: reason };
+    else reason = offTopic ? 'This asks about ' + offTopic + ', which PDG Flights doesn\'t do. We say so, ask where they\'d like to fly and offer examples.' : 'There\'s no trip in this request. We say so, ask where they\'d like to go and offer examples.';
+    return { key: key, intent: intent, rule: winner, slots: slots, missing: missing, checks: checks, reason: reason, offTopic: offTopic };
   }
 
   // render(text, forcedKey?, extra?) -> { key, html:[cardHTML], decision }
@@ -1436,7 +1490,7 @@ main { flex: 1; }
     extra = extra || {};
     var d = route(text, extra.ov);
     var key = forced || d.key;
-    var ctx = { text: text, slots: d.slots, intent: d.intent === 'unknown' ? 'baseline' : d.intent, missing: d.missing, retry: extra.retry };
+    var ctx = { text: text, slots: d.slots, intent: d.intent === 'unknown' ? 'baseline' : d.intent, missing: d.missing, retry: extra.retry, offTopic: d.offTopic };
     if (extra.edit) { key = 'ask'; ctx.missing = extra.edit; ctx.editing = true; }
     if (forced === 'ask' && !d.missing && !extra.edit) ctx.missing = 'from';
     return { key: key, html: CASES[key](text.toLowerCase(), ctx), decision: d };
@@ -1552,7 +1606,7 @@ main { flex: 1; }
     { id: 'F4', g: 'F', t: 'My flight was cancelled', ex: 'My flight from Edinburgh to London got cancelled, I need the next available flight', s: 'part', res: 'Emergency', r: EMERG, note: 'The Booking card offers rebooking. We can\'t see their booking yet.', live: 1 },
     { id: 'F5', g: 'F', t: 'Missed connection', ex: 'I\'m going to miss my connection in Amsterdam, I need to get to London', s: 'new', res: 'Emergency', r: [['ai-note', 'What\'s happening and what we did'], ['trip', 'From the connecting airport'], ['status', 'Warning: the late flight'], ['booking', 'Rebook instead', 1], ['group-label', 'Next flights from Amsterdam'], ['flight', 'Flights they can still make']], note: 'Same as Emergency, from the connecting airport. No Airport card.' },
     { id: 'H1', g: 'H', t: 'Off topic', ex: 'What should I pack for a wedding?', s: 'built', res: 'Unknown', r: UNK, live: 1 },
-    { id: 'H2', g: 'H', t: 'Nearby topic', ex: 'Find me a hotel in Lisbon', s: 'part', res: 'Unknown', r: UNK, note: 'Should get Unknown. Today the kit sees "Lisbon" and asks where they\'re flying from.' },
+    { id: 'H2', g: 'H', t: 'Nearby topic', ex: 'Find me a hotel in Lisbon', s: 'built', res: 'Unknown', r: UNK, live: 1 },
     { id: 'H3', g: 'H', t: 'Out of scope', ex: 'Cancel my booking', s: 'new', res: 'Unknown', r: UNK, note: 'The Status card should name what we can\'t do here, then offer what we can.' },
     { id: 'P1', g: 'P', t: 'Book', ex: 'Fare and bags, seats, traveller details, payment', s: 'parked' },
     { id: 'P2', g: 'P', t: 'Manage a booking', ex: 'Find my trip, change, cancel, refund, add extras, fix a name', s: 'parked' },
