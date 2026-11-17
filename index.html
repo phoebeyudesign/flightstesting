@@ -471,6 +471,20 @@ main { flex: 1; }
 .scroll { overflow-x: auto; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-3); }
 .match { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--space-2); }
 .match a { font: 600 12px/16px var(--font-sans); padding: 2px 8px; border-radius: var(--radius-1); background: var(--primary); color: var(--on-primary); text-decoration: none; }
+.chk { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--radius-full); font: 700 11px/1 var(--font-sans); border: var(--border-width) solid var(--border); background: var(--surface); color: var(--text-muted); }
+.chk--pass { background: var(--success); border-color: var(--success); color: var(--surface); }
+.chk--fail { background: var(--error); border-color: var(--error); color: var(--surface); }
+.chk--review { border-style: dashed; border-color: var(--warning); color: var(--warning); }
+.chks { display: flex; gap: 4px; flex-wrap: wrap; }
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.checks li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: var(--space-2); align-items: start; }
+.checks .muted { display: block; }
+.gsum { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-3); }
+.gsum span { padding: var(--space-2) var(--space-3); border-radius: var(--radius-2); background: var(--surface); border: var(--border-width) solid var(--border); }
+.gsum strong { font-variant-numeric: tabular-nums; }
+.owner { display: inline-block; padding: 2px 8px; border-radius: var(--radius-1); background: var(--primary); color: var(--on-primary); font-weight: 600; white-space: nowrap; }
+.ground--steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#test .h1 { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -483,25 +497,62 @@ main { flex: 1; }
       </span>
       <span class="h4">PDG Flights <span class="brand__sub">Sketch space</span></span>
     </a>
-    <a class="pdg-btn pdg-btn--secondary caption" href="#test">Test a request</a>
+    <a class="pdg-btn pdg-btn--secondary caption" href="#governance">Who owns the rules</a>
   </div>
 </header>
 
 <nav class="nav" aria-label="Sections">
   <div class="wrap caption">
+    <a href="#test">Test</a>
     <a href="#rules">Ground rules</a>
     <a href="#scenarios">Scenarios</a>
     <a href="#components">Components</a>
-    <a href="#test">Test</a>
+    <a href="#governance">Governance</a>
   </div>
 </nav>
 
 <main>
-  <section class="section hero" id="rules">
+  <section class="section" id="test">
     <div class="wrap">
-      <span class="eyebrow small">Rules and sketch space · Draft v0.3</span>
-      <h1 class="h1">Every request a traveller might type, and the cards we answer it with.</h1>
-      <p class="body lede">PDG Flights builds its screen per request. The AI reads what the traveller asked, picks one result, and builds it from a fixed kit of cards. This page maps what travellers ask (scenarios) to what we build answers from (components). Then you can test any request below.</p>
+      <div class="section__head">
+        <span class="eyebrow small">Test · Rules and sketch space, draft v0.4</span>
+        <h1 class="h1">Type a request and see the result</h1>
+        <p class="body lede">This runs the same rules as the testing home page. You'll see which result wins, why, which scenarios it matches, and the cards the traveller would see. Tap an answer in the result to add it to your request.</p>
+      </div>
+      <div class="play">
+        <div class="play__side">
+          <form class="prompt" id="pg-form" autocomplete="off">
+            <label class="visually-hidden" for="pg-input">Request</label>
+            <textarea class="body prompt__input" id="pg-input" rows="3" placeholder="e.g. Get me to Lisbon this weekend"></textarea>
+            <div class="prompt__bar"><span></span><button class="pdg-btn pdg-btn--primary body" type="submit">Run</button></div>
+          </form>
+          <div>
+            <p class="caption muted" style="margin-bottom: var(--space-2)">Try one</p>
+            <div class="examples" id="pg-examples"></div>
+          </div>
+          <div id="pg-verdict"></div>
+          <div id="pg-checks"></div>
+          <div>
+            <p class="caption muted" style="margin-bottom: var(--space-2)">Details found</p>
+            <dl class="slots caption" id="pg-slots"></dl>
+          </div>
+          <div>
+            <p class="caption muted" style="margin-bottom: var(--space-2)">Rules, in order</p>
+            <ol class="trace caption" id="pg-trace"></ol>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage__label small"><span>What the traveller sees</span><span id="pg-tag"></span></div>
+          <div class="canvas" id="pg-canvas"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="rules">
+    <div class="wrap">
+      <span class="eyebrow small">Ground rules</span>
+      <h2 class="h2">Every request a traveller might type, and the cards we answer it with.</h2>
+      <p class="body lede">PDG Flights builds its screen per request. The AI reads what the traveller asked, picks one result, and builds it from a fixed kit of cards. This page maps what travellers ask (scenarios) to what we build answers from (components), and says who owns each rule and how changes are checked (governance).</p>
       <div class="scope caption"><span class="muted">Scope</span>
         <span class="scope__chip scope__chip--in">Find</span><span class="scope__chip scope__chip--in">Explore</span><span class="scope__chip scope__chip--in">Compare</span><span class="scope__chip scope__chip--in">Disruption</span>
         <span class="scope__chip scope__chip--out">Book</span><span class="scope__chip scope__chip--out">Manage</span><span class="scope__chip scope__chip--out">Day of travel</span>
@@ -549,39 +600,24 @@ main { flex: 1; }
     </div>
   </section>
 
-  <section class="section" id="test">
+  <section class="section" id="governance">
     <div class="wrap">
       <div class="section__head">
-        <span class="eyebrow small">Test</span>
-        <h2 class="h2">Type a request and see the result</h2>
-        <p class="body lede">This runs the same rules as the testing home page. You'll see which result wins, why, which scenarios it matches, and the cards the traveller would see. Tap an answer in the result to add it to your request.</p>
+        <span class="eyebrow small">Governance</span>
+        <h2 class="h2">Who owns the rules, and how we check them</h2>
+        <p class="body lede">The Design lead owns every rule, and the scenarios, cards, blocks and wording too. Nothing changes without their approval, and every change runs the eval set below before it ships.</p>
       </div>
-      <div class="play">
-        <div class="play__side">
-          <form class="prompt" id="pg-form" autocomplete="off">
-            <label class="visually-hidden" for="pg-input">Request</label>
-            <textarea class="body prompt__input" id="pg-input" rows="3" placeholder="e.g. Get me to Lisbon this weekend"></textarea>
-            <div class="prompt__bar"><span></span><button class="pdg-btn pdg-btn--primary body" type="submit">Run</button></div>
-          </form>
-          <div>
-            <p class="caption muted" style="margin-bottom: var(--space-2)">Try one</p>
-            <div class="examples" id="pg-examples"></div>
-          </div>
-          <div id="pg-verdict"></div>
-          <div>
-            <p class="caption muted" style="margin-bottom: var(--space-2)">Details found</p>
-            <dl class="slots caption" id="pg-slots"></dl>
-          </div>
-          <div>
-            <p class="caption muted" style="margin-bottom: var(--space-2)">Rules, in order</p>
-            <ol class="trace caption" id="pg-trace"></ol>
-          </div>
-        </div>
-        <div class="stage">
-          <div class="stage__label small"><span>What the traveller sees</span><span id="pg-tag"></span></div>
-          <div class="canvas" id="pg-canvas"></div>
-        </div>
-      </div>
+
+      <div class="sub"><h3 class="h3">Rules and their checks</h3><p class="caption muted">Seven rules are checked automatically on every result. Rule 8 needs the Design lead to look.</p></div>
+      <div class="scroll"><table class="btable caption" id="gov-owners"></table></div>
+
+
+      <div class="sub"><h3 class="h3">Eval run</h3><p class="caption muted">Every built scenario's example request, run through the kit and checked against the rules. This runs live each time the page opens, so it always reflects the current kit. ✓ passes, ✕ fails, a grey number means that rule doesn't apply, and ? needs a person.</p></div>
+      <div id="gov-summary"></div>
+      <div class="scroll"><table class="btable caption" id="gov-evals"></table></div>
+
+      <div class="sub"><h3 class="h3">How a change ships</h3><p class="caption muted">The same four steps for a new scenario, card, block, rule or wording change.</p></div>
+      <ol class="ground ground--steps" id="gov-process"></ol>
     </div>
   </section>
 </main>
@@ -1698,6 +1734,49 @@ main { flex: 1; }
   $('blocks').innerHTML = '<thead><tr><th>Block</th><th>What it shows</th><th>Used in</th><th>Status</th></tr></thead><tbody>' +
     BLOCKS.map(function (b) { return '<tr><th>' + b[0] + '</th><td>' + b[1] + '</td><td>' + b[2] + '</td><td>' + (b[3] ? '<span class="st st--built small">Built</span>' : '<span class="st st--new small">To build</span>') + '</td></tr>'; }).join('') + '</tbody>';
 
+
+  /* ---------------- Governance ---------------- */
+  var OWNERS = ['Design lead', 'Design lead', 'Design lead', 'Design lead', 'Design lead', 'Design lead', 'Design lead', 'Design lead'];
+  var HOW = ['Auto: one result key per request', 'Auto: no flights shown while from, to or when is missing', 'Auto: at most one Question card', 'Auto: every need shows as a removable chip', 'Auto: no hotels, trains or alerts while a flight works', 'Auto: Unknown has a Status card and suggestions', 'Auto: Your trip chips, and Sort on 2+ flights', 'Person: owner reviews each new or changed block'];
+  function count(box, sel) { return box.querySelectorAll(sel).length; }
+  function check(out) {
+    var box = document.createElement('div'); box.innerHTML = out.html.join('');
+    var d = out.decision, k = out.key, flights = count(box, '.flight') + count(box, '.highlight');
+    var needs = Object.keys((d.slots && d.slots.needs) || {}), extras = count(box, '.list') + count(box, '.toggle');
+    function r(state, note) { return { state: state, note: note }; }
+    return [
+      r('pass', 'One result: ' + K.LABELS[k] + '.'),
+      d.missing ? (flights ? r('fail', 'Flights shown while ' + d.missing + ' is missing.') : r('pass', 'Asked for ' + (d.missing === 'date' ? 'the date' : 'where ' + d.missing) + ' before showing flights.')) : r('pass', 'From, to and when are all known.'),
+      count(box, '.question') <= 1 ? r('pass', count(box, '.question') ? 'One question.' : 'No question needed.') : r('fail', count(box, '.question') + ' questions at once.'),
+      !needs.length ? r('na', 'No needs in this request.') : k === 'ask' ? r('na', 'Asking a question first.') : (count(box, '.trip__chip--need') >= needs.length ? r('pass', needs.length + ' need' + (needs.length > 1 ? 's' : '') + ' shown as chips.') : r('fail', 'A need was dropped.')),
+      k === 'emergency-none' ? r('pass', 'No flight works, so extras are allowed.') : (extras ? r('fail', 'Extras shown while a flight works.') : r('pass', 'Nothing extra.')),
+      k !== 'unknown' ? r('na', 'Not an Unknown result.') : (count(box, '.status') && count(box, '.suggest') ? r('pass', 'Says so, and offers a way back.') : r('fail', 'No Status card or suggestions.')),
+      !flights ? r('na', 'No flights shown.') : (count(box, '.trip') && (count(box, '.flight') < 2 || count(box, '.sort-select')) ? r('pass', 'Trip chips and Sort are there.') : r('fail', 'Missing trip chips or Sort.')),
+      r('review', 'Needs the Design lead to review.')
+    ];
+  }
+  var MARK = { pass: '✓', fail: '✕', na: '–', review: '?' };
+  function chk(c, i) { return '<span class="chk chk--' + c.state + '" title="Rule ' + (i + 1) + ': ' + esc(c.note) + '">' + (c.state === 'na' ? i + 1 : MARK[c.state]) + '</span>'; }
+  function checkList(cs) {
+    return '<ul class="checks caption">' + cs.map(function (c, i) { return '<li>' + chk(c, i) + '<span><span class="strong">' + (i + 1) + '. ' + GROUND[i][0] + '</span><span class="muted">' + c.note + '</span></span></li>'; }).join('') + '</ul>';
+  }
+  $('gov-owners').innerHTML = '<thead><tr><th>Rule</th><th>Owner</th><th>How it\'s checked</th></tr></thead><tbody>' +
+    GROUND.map(function (g, i) { return '<tr><th>' + (i + 1) + '. ' + g[0] + '</th><td><span class="owner small">' + OWNERS[i] + '</span></td><td>' + HOW[i] + '</td></tr>'; }).join('') + '</tbody>';
+  var evals = SC.filter(function (s) { return s.live; }).map(function (s) { var o = K.render(s.ex); return { s: s, out: o, cs: check(o) }; });
+  var nFail = evals.filter(function (e) { return e.cs.some(function (c) { return c.state === 'fail'; }); }).length;
+  var nAuto = evals.reduce(function (n, e) { return n + e.cs.filter(function (c) { return c.state === 'pass' || c.state === 'fail'; }).length; }, 0);
+  var nPass = evals.reduce(function (n, e) { return n + e.cs.filter(function (c) { return c.state === 'pass'; }).length; }, 0);
+  $('gov-summary').innerHTML = '<div class="gsum caption"><span><strong>' + evals.length + '</strong> scenarios run</span><span><strong>' + (evals.length - nFail) + '</strong> with no failures</span><span><strong>' + nPass + ' of ' + nAuto + '</strong> automatic checks pass</span><span>Rule 8 needs a person on each</span></div>';
+  $('gov-evals').innerHTML = '<thead><tr><th>Scenario</th><th>Result</th><th>Rules 1 to 8</th></tr></thead><tbody>' +
+    evals.map(function (e) { return '<tr><th><a href="#scenarios" data-show="' + e.s.id + '">' + e.s.id + '</a> ' + e.s.t + '</th><td>' + K.LABELS[e.out.key] + '</td><td><div class="chks">' + e.cs.map(chk).join('') + '</div></td></tr>'; }).join('') + '</tbody>';
+  var STEPS = [
+    ['Propose', 'Write the change in RULES.md: the scenario, card, block or rule, and why no existing one does the job.'],
+    ['Design lead reviews', 'The Design lead approves it, or sends it back with what to change.'],
+    ['Run the evals', 'Rebuild the kit and open this page. Every scenario must pass. A new scenario adds its example to the set.'],
+    ['Ship and log', 'Upload, bump the draft number and note the change. For a live product, also keep a sample of real results and check them each week.']
+  ];
+  $('gov-process').innerHTML = STEPS.map(function (x) { return '<li><span class="body strong">' + x[0] + '</span><span class="caption">' + x[1] + '</span></li>'; }).join('');
+
   /* ---------------- Test ---------------- */
   var KEY_SC = { baseline: ['A1', 'A2', 'A4', 'A5', 'A6'], ask: ['A3'], spontaneous: ['B1'], emergency: ['F1', 'F3', 'F4'], 'emergency-none': ['F2'], unknown: ['H1', 'H3'] };
   var pgInput = $('pg-input');
@@ -1722,6 +1801,8 @@ main { flex: 1; }
       return '<li class="' + cls + '"><span class="trace__mark" aria-hidden="true">' + mark + '</span><div><span class="strong">' + (typeof c.order === 'number' ? c.order + '. ' : 'Then: ') + c.name + '</span>' +
         (c.matched.length ? ' <span class="muted">· ' + c.matched.join(', ') + '</span>' : '') + '<br><span class="muted">' + c.note + '</span></div></li>';
     }).join('');
+    var cs = check(out);
+    $('pg-checks').innerHTML = '<p class="caption muted" style="margin-bottom: var(--space-2)">Rule check</p>' + checkList(cs);
     $('pg-tag').innerHTML = '<span class="case-tag small">Result: ' + K.LABELS[out.key] + '</span>';
     var canvas = $('pg-canvas');
     canvas.innerHTML = out.html.join('');
